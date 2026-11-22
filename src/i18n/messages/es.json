@@ -1,0 +1,328 @@
+{
+  "Metadata": {
+    "title": "{appName} — Plataforma escolar de lenguaje oral y lectura",
+    "description": "Plantilla MVP inspirada en Leeduca para navegar por módulos de cribado, evaluación e intervención."
+  },
+  "Common": {
+    "appName": "Leeduca",
+    "demoBadge": "MVP · Contenido de demostración",
+    "placeholder": "Contenido pendiente de incorporar. Esta pantalla forma parte de la plantilla navegable.",
+    "viewSection": "Ver sección",
+    "backToHome": "Volver al inicio",
+    "backToPlatform": "Volver al panel",
+    "openModule": "Abrir módulo",
+    "ageYears": "{age} años",
+    "inDevelopment": "En construcción",
+    "language": "Idioma"
+  },
+  "Exercises": {
+    "title": "Tirada de ejercicios para practicar",
+    "intro": "Actividades dinámicas y orientativas para trabajar con el alumnado. Son ejercicios de plantilla (no contenidos oficiales de Leeduca).",
+    "teacherNote": "Pauta para el adulto",
+    "start": "Comenzar práctica",
+    "restart": "Repetir tirada",
+    "check": "Comprobar",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "showSequence": "Mostrar secuencia",
+    "hideSequence": "Ocultar y responder",
+    "correct": "¡Muy bien!",
+    "incorrect": "Casi. Respuesta correcta:",
+    "progress": "Ejercicio {current} de {total}",
+    "completedTitle": "Tirada completada",
+    "completedBody": "Has completado {correct} de {total} ejercicios.",
+    "score": "Aciertos",
+    "area": "Área",
+    "technicalInfo": "Información y contenidos técnicos (desplegar)",
+    "areas": {
+      "phonological": "Conciencia fonológica",
+      "vocabulary": "Vocabulario",
+      "comprehension": "Comprensión oral",
+      "memory": "Memoria verbal",
+      "morphosyntax": "Morfosintaxis",
+      "alphabetic": "Principio alfabético"
+    },
+    "generator": {
+      "title": "Crear ejercicios por temática",
+      "subtitle": "Elige una temática y genera ejemplos adaptados para practicar en el momento.",
+      "theme": "Temática",
+      "themePlaceholder": "Ej.: animales de la granja, el invierno, la tienda, el cuerpo humano",
+      "age": "Edad",
+      "ageOption": "{age} años",
+      "difficulty": "Dificultad",
+      "difficulties": {
+        "easy": "Fácil",
+        "medium": "Media",
+        "hard": "Difícil"
+      },
+      "area": "Área",
+      "areaMixed": "Mixta (varias áreas)",
+      "exerciseType": "Tipo de ejercicio",
+      "exerciseTypes": {
+        "mixed": "Mixto",
+        "choice": "Elección (opciones)",
+        "memory": "Memoria (secuencia)"
+      },
+      "optionCount": "N.º de opciones",
+      "optionCounts": {
+        "auto": "Automático",
+        "2": "2 opciones",
+        "3": "3 opciones",
+        "4": "4 opciones"
+      },
+      "count": "N.º de ejercicios",
+      "countOption": "{count} ejercicios",
+      "focus": "Objetivo o enfoque (opcional)",
+      "focusPlaceholder": "Ej.: rimas, sílabas iniciales, contar objetos, ordenar secuencias",
+      "notes": "Indicaciones extra (opcional)",
+      "notesPlaceholder": "Ej.: usa vocabulario cotidiano, incluye imágenes de animales, evita palabras difíciles",
+      "generate": "Generar",
+      "generating": "Generando ejercicios…",
+      "useDefault": "Usar tirada por defecto",
+      "hint": "La generación usa IA y puede tardar unos segundos. Revisa los contenidos antes de usarlos con el alumnado.",
+      "aiBadge": "Generado con IA",
+      "newSet": "Nueva tirada",
+      "changeSetup": "Cambiar temática / configuración",
+      "errors": {
+        "themeRequired": "Escribe una temática para generar los ejercicios.",
+        "notConfigured": "La generación con IA no está configurada. Añade una clave de IA (p. ej. GROQ_API_KEY u OPENAI_API_KEY) en las variables de entorno.",
+        "invalidInput": "Revisa la temática y las opciones seleccionadas.",
+        "timeout": "La generación ha tardado demasiado. Inténtalo de nuevo.",
+        "unauthorized": "La clave de IA no es válida o no tiene permisos. Revisa GROQ_API_KEY/OPENAI_API_KEY en .env.local y reinicia el servidor.",
+        "rateLimit": "Se ha alcanzado el límite del proveedor de IA. Espera un momento e inténtalo de nuevo.",
+        "badRequest": "El proveedor de IA rechazó la solicitud (modelo o petición no válida). Revisa GROQ_MODEL/OPENAI_MODEL o prueba con otro modelo y reinicia.",
+        "requestFailed": "El proveedor de IA devolvió un error. Inténtalo de nuevo en unos segundos.",
+        "invalidResponse": "No se han podido generar ejercicios válidos. Prueba con otra temática, reduce la cantidad o inténtalo de nuevo.",
+        "generic": "No se han podido generar los ejercicios. Revisa la terminal del servidor (npm run dev) para ver el detalle e inténtalo de nuevo."
+      }
+    }
+  },
+  "Nav": {
+    "home": "Inicio",
+    "whatIs": "Qué es Leeduca",
+    "oralLanguage": "Lenguaje oral y lectura",
+    "tools": "Herramientas",
+    "intervention": "Programas de intervención",
+    "screening": "Cribado e informes",
+    "products": "Productos",
+    "resources": "Recursos",
+    "team": "El equipo",
+    "blog": "Blog",
+    "contact": "Contacto",
+    "access": "Acceso",
+    "platform": "Plataforma",
+    "demo": "Ver demo",
+    "legal": "Aviso legal",
+    "privacy": "Privacidad",
+    "cookies": "Cookies",
+    "terms": "Términos"
+  },
+  "Home": {
+    "heroTitle": "Plataforma escolar de lenguaje oral, lectura y prevención de dificultades",
+    "heroSubtitle": "Plantilla MVP para explorar la estructura de una web tipo Leeduca: cribado, evaluación, intervención y seguimiento en un entorno educativo.",
+    "ctaExplore": "Explorar la plataforma",
+    "ctaLearn": "Qué es Leeduca",
+    "sectionsTitle": "Áreas principales",
+    "cardScreeningTitle": "Cribado y evaluación",
+    "cardScreeningBody": "Detección temprana y seguimiento con pruebas individuales y colectivas por edades.",
+    "cardInterventionTitle": "Programas de intervención",
+    "cardInterventionBody": "Itinerarios como Preleo y Leetrea para estimular y consolidar habilidades lectoras.",
+    "cardResourcesTitle": "Recursos y evidencia",
+    "cardResourcesBody": "Materiales, publicaciones y apoyo para centros, docentes y familias."
+  },
+  "PublicLayout": {
+    "tagline": "Intervención, cribado y monitorización del lenguaje oral y la lectura.",
+    "footerNote": "Plantilla demostrativa sin contenido real ni vínculo operativo con la plataforma original."
+  },
+  "Pages": {
+    "whatIs": {
+      "title": "Qué es Leeduca",
+      "intro": "Leeduca es un proyecto orientado a prevenir e intervenir las dificultades de lenguaje oral y lectura desde la escuela, combinando evaluación, intervención y seguimiento.",
+      "sections": {
+        "purposeTitle": "Propósito",
+        "purposeBody": "Facilitar la detección temprana y la respuesta educativa basada en evidencia.",
+        "schoolTitle": "Enfoque escolar",
+        "schoolBody": "Herramientas pensadas para su uso en centros educativos y coordinación con profesionales.",
+        "monitorTitle": "Monitorización",
+        "monitorBody": "Seguimiento del progreso para ajustar apoyos y programas de intervención."
+      }
+    },
+    "oralLanguage": {
+      "title": "Lenguaje oral y lectura",
+      "intro": "El desarrollo del lenguaje oral es la base del aprendizaje lector. Esta sección presentaría fundamentos, señales de alerta y líneas de trabajo preventivo.",
+      "blocks": {
+        "oralTitle": "Lenguaje oral",
+        "oralBody": "Conciencia fonológica, vocabulario, comprensión y expresión.",
+        "readingTitle": "Lectura y escritura",
+        "readingBody": "Decodificación, fluidez, comprensión lectora y escritura.",
+        "supportTitle": "Apoyos educativos",
+        "supportBody": "Orientaciones para intervención temprana y coordinación escuela-familia."
+      }
+    },
+    "intervention": {
+      "title": "Programas de intervención",
+      "intro": "Espacio para describir los programas de estimulación e intervención. En el MVP se incluyen accesos a Preleo y Leetrea.",
+      "programs": {
+        "preleoTitle": "Preleo",
+        "preleoBody": "Estimulación del lenguaje oral: programa universal, intensificación, repaso y paleta.",
+        "leetreaTitle": "Leetrea",
+        "leetreaBody": "Aprendizaje y consolidación de la lectura con itinerarios estructurados."
+      }
+    },
+    "screening": {
+      "title": "Cribado e informes",
+      "intro": "Área destinada a la detección precoz, baterías de evaluación e informes de seguimiento para la toma de decisiones educativas.",
+      "items": {
+        "individualTitle": "Cribado universal individual",
+        "individualBody": "Aplicación individual por edades (3 a 8 años en la demo observada).",
+        "collectiveTitle": "Cribado universal colectivo",
+        "collectiveBody": "Aplicación colectiva por edades (6 a 11 años en la demo observada).",
+        "reportsTitle": "Informes y monitorización",
+        "reportsBody": "Resultados, perfiles de riesgo y evolución (pendiente de datos reales)."
+      }
+    },
+    "products": {
+      "title": "Productos",
+      "intro": "Catálogo de soluciones, licencias o servicios para centros. Contenido pendiente de definición."
+    },
+    "resources": {
+      "title": "Recursos",
+      "intro": "Publicaciones, artículos científicos, materiales descargables y recursos formativos.",
+      "links": {
+        "publications": "Publicaciones",
+        "articles": "Artículos científicos",
+        "materials": "Materiales Leeduca",
+        "blog": "Blog"
+      }
+    },
+    "team": {
+      "title": "El equipo",
+      "intro": "Presentación del equipo investigador, clínico y educativo implicado en el proyecto. Información pendiente."
+    },
+    "blog": {
+      "title": "Blog",
+      "intro": "Noticias, experiencias en centros y difusión sobre lenguaje oral y lectura.",
+      "empty": "No hay entradas publicadas en esta plantilla de demostración."
+    },
+    "contact": {
+      "title": "Contacto",
+      "intro": "Canales de contacto para centros educativos, familias y profesionales.",
+      "form": {
+        "name": "Nombre",
+        "email": "Correo electrónico",
+        "center": "Centro educativo",
+        "message": "Mensaje",
+        "send": "Enviar consulta (demo)",
+        "disclaimer": "Formulario demostrativo: no envía información."
+      }
+    },
+    "access": {
+      "title": "Acceso",
+      "intro": "Acceso a la plataforma para centros y profesionales. En este MVP el acceso abre directamente el entorno de demostración.",
+      "userLabel": "Usuario",
+      "passwordLabel": "Contraseña",
+      "submit": "Entrar en la demo",
+      "note": "No hay autenticación real. Usa el botón para explorar las pantallas de plataforma."
+    },
+    "legal": {
+      "title": "Aviso legal",
+      "intro": "Texto legal pendiente de adaptación al titular, finalidad y condiciones del servicio."
+    },
+    "privacy": {
+      "title": "Política de privacidad",
+      "intro": "Información sobre tratamiento de datos pendiente. Las aplicaciones educativas deben definir bases legales, finalidades, conservación y derechos."
+    },
+    "cookies": {
+      "title": "Política de cookies",
+      "intro": "Información sobre cookies y tecnologías similares pendiente de configuración real."
+    },
+    "terms": {
+      "title": "Términos y condiciones",
+      "intro": "Condiciones de uso del servicio pendientes de redacción y revisión."
+    }
+  },
+  "Platform": {
+    "title": "Plataforma Leeduca",
+    "subtitle": "Entorno de demostración con navegación por módulos",
+    "userDemo": "Usuario demo: CENTRO EDUCATIVO",
+    "universal": {
+      "hubIntro": "Desde este recurso se accede a todos los servicios de evaluación, cribado e intervención incluidos en la plantilla: cribado individual y colectivo, baterías de evaluación, Leetrea y líneas de trabajo de Preleo.",
+      "servicesTitle": "Servicios de evaluación e intervención",
+      "preleoLinesTitle": "Líneas de trabajo Preleo",
+      "preleoLinesIntro": "Acceso directo a las modalidades del programa dentro del recurso universal."
+    },
+    "nav": {
+      "dashboard": "Panel",
+      "screeningIndividual": "Cribado individual",
+      "screeningCollective": "Cribado colectivo",
+      "batteries": "Baterías de evaluación",
+      "preleo": "Preleo",
+      "leetrea": "Leetrea",
+      "exit": "Salir al sitio"
+    },
+    "dashboard": {
+      "title": "Servicios del centro",
+      "intro": "Selecciona un sistema para explorar las pantallas previstas en el MVP.",
+      "cards": {
+        "screeningIndividual": "Cribado universal individual por edades (3–8 años).",
+        "screeningCollective": "Cribado universal colectivo por edades (6–11 años).",
+        "batteries": "Evaluación individual: lectura, escritura, lenguaje oral y áreas en desarrollo.",
+        "preleo": "Estimulación del lenguaje oral con programas y recursos.",
+        "leetrea": "Intervención para el aprendizaje de la lectura."
+      }
+    },
+    "screeningIndividual": {
+      "title": "Leeduca",
+      "intro": "Actividades y práctica individual para el desarrollo del lenguaje oral y prelectura (MVP centrado en 4 años, según programación didáctica PRELEO).",
+      "ages": "Edad disponible"
+    },
+    "screeningCollective": {
+      "title": "Cribado universal colectivo",
+      "intro": "Aplicación colectiva para cribado en grupo. Selecciona un curso/edad.",
+      "ages": "Edades disponibles"
+    },
+    "batteries": {
+      "title": "Baterías de evaluación individual",
+      "intro": "Conjunto de pruebas para profundizar en el perfil lingüístico y lector.",
+      "areas": {
+        "readingWriting": "Lectura y escritura",
+        "phonological": "Déficit fonológico",
+        "oral": "Lenguaje oral",
+        "visual": "Déficit visual",
+        "mathExec": "Matemáticas y funciones ejecutivas"
+      }
+    },
+    "preleo": {
+      "title": "Preleo",
+      "intro": "Programa de estimulación del lenguaje oral. Selecciona una línea de trabajo.",
+      "programs": {
+        "universal": "Programa universal",
+        "intensificacion": "Intensificación",
+        "repaso": "Programa de repaso",
+        "paleta": "Paleta Leeduca"
+      }
+    },
+    "leetrea": {
+      "title": "Leetrea",
+      "intro": "Programa de aprendizaje de la lectura. Pantalla de demostración para itinerarios, sesiones y seguimiento."
+    },
+    "agePage": {
+      "title": "Edad: {age} años",
+      "intro": "Vista de demostración para actividades, pruebas o materiales correspondientes a este grupo.",
+      "blocks": {
+        "activities": "Actividades previstas",
+        "assessment": "Evaluación / registro",
+        "results": "Resultados e informes"
+      }
+    },
+    "programPage": {
+      "title": "{program}",
+      "intro": "Vista de demostración del programa seleccionado dentro de Preleo.",
+      "blocks": {
+        "objectives": "Objetivos",
+        "sessions": "Sesiones y materiales",
+        "tracking": "Seguimiento"
+      }
+    }
+  }
+}

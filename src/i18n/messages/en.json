@@ -1,0 +1,328 @@
+{
+  "Metadata": {
+    "title": "{appName} — School platform for oral language and reading",
+    "description": "MVP template inspired by Leeduca to navigate screening, assessment, and intervention modules."
+  },
+  "Common": {
+    "appName": "Leeduca",
+    "demoBadge": "MVP · Demo content",
+    "placeholder": "Content to be added. This screen is part of the navigable template.",
+    "viewSection": "View section",
+    "backToHome": "Back to home",
+    "backToPlatform": "Back to dashboard",
+    "openModule": "Open module",
+    "ageYears": "{age} years",
+    "inDevelopment": "In progress",
+    "language": "Language"
+  },
+  "Exercises": {
+    "title": "Practice exercise set",
+    "intro": "Dynamic, guidance activities to work with children. These are template exercises (not official Leeduca content).",
+    "teacherNote": "Adult guidance",
+    "start": "Start practice",
+    "restart": "Restart set",
+    "check": "Check",
+    "next": "Next",
+    "previous": "Previous",
+    "showSequence": "Show sequence",
+    "hideSequence": "Hide and answer",
+    "correct": "Great job!",
+    "incorrect": "Close. Correct answer:",
+    "progress": "Exercise {current} of {total}",
+    "completedTitle": "Set completed",
+    "completedBody": "You completed {correct} out of {total} exercises.",
+    "score": "Correct",
+    "area": "Area",
+    "technicalInfo": "Technical and content information (expand)",
+    "areas": {
+      "phonological": "Phonological awareness",
+      "vocabulary": "Vocabulary",
+      "comprehension": "Oral comprehension",
+      "memory": "Verbal memory",
+      "morphosyntax": "Morphosyntax",
+      "alphabetic": "Alphabetic principle"
+    },
+    "generator": {
+      "title": "Create exercises by theme",
+      "subtitle": "Choose a theme and generate tailored examples to practice right away.",
+      "theme": "Theme",
+      "themePlaceholder": "E.g. farm animals, winter, the shop, the human body",
+      "age": "Age",
+      "ageOption": "{age} years",
+      "difficulty": "Difficulty",
+      "difficulties": {
+        "easy": "Easy",
+        "medium": "Medium",
+        "hard": "Hard"
+      },
+      "area": "Area",
+      "areaMixed": "Mixed (various areas)",
+      "exerciseType": "Exercise type",
+      "exerciseTypes": {
+        "mixed": "Mixed",
+        "choice": "Choice (options)",
+        "memory": "Memory (sequence)"
+      },
+      "optionCount": "Number of options",
+      "optionCounts": {
+        "auto": "Automatic",
+        "2": "2 options",
+        "3": "3 options",
+        "4": "4 options"
+      },
+      "count": "Number of exercises",
+      "countOption": "{count} exercises",
+      "focus": "Goal or focus (optional)",
+      "focusPlaceholder": "E.g. rhymes, initial syllables, counting objects, ordering sequences",
+      "notes": "Extra instructions (optional)",
+      "notesPlaceholder": "E.g. use everyday vocabulary, include animal images, avoid difficult words",
+      "generate": "Generate",
+      "generating": "Generating exercises…",
+      "useDefault": "Use default set",
+      "hint": "Generation uses AI and may take a few seconds. Review content before using it with children.",
+      "aiBadge": "AI generated",
+      "newSet": "New set",
+      "changeSetup": "Change theme / setup",
+      "errors": {
+        "themeRequired": "Enter a theme to generate exercises.",
+        "notConfigured": "AI generation is not configured. Add an AI key (e.g. GROQ_API_KEY or OPENAI_API_KEY) to the environment variables.",
+        "invalidInput": "Check the theme and selected options.",
+        "timeout": "Generation took too long. Please try again.",
+        "unauthorized": "The AI key is invalid or lacks permissions. Check GROQ_API_KEY/OPENAI_API_KEY in .env.local and restart the server.",
+        "rateLimit": "The AI provider rate limit was reached. Wait a moment and try again.",
+        "badRequest": "The AI provider rejected the request (invalid model or payload). Check GROQ_MODEL/OPENAI_MODEL or try another model and restart.",
+        "requestFailed": "The AI provider returned an error. Please try again shortly.",
+        "invalidResponse": "Could not generate valid exercises. Try another theme, reduce the count, or try again.",
+        "generic": "Could not generate exercises. Check the server terminal (npm run dev) for details and try again."
+      }
+    }
+  },
+  "Nav": {
+    "home": "Home",
+    "whatIs": "What is Leeduca",
+    "oralLanguage": "Oral language and reading",
+    "tools": "Tools",
+    "intervention": "Intervention programs",
+    "screening": "Screening and reports",
+    "products": "Products",
+    "resources": "Resources",
+    "team": "Team",
+    "blog": "Blog",
+    "contact": "Contact",
+    "access": "Access",
+    "platform": "Platform",
+    "demo": "View demo",
+    "legal": "Legal notice",
+    "privacy": "Privacy",
+    "cookies": "Cookies",
+    "terms": "Terms"
+  },
+  "Home": {
+    "heroTitle": "School platform for oral language, reading, and early difficulty prevention",
+    "heroSubtitle": "MVP template to explore a Leeduca-like web structure: screening, assessment, intervention, and follow-up in an educational setting.",
+    "ctaExplore": "Explore platform",
+    "ctaLearn": "What is Leeduca",
+    "sectionsTitle": "Main areas",
+    "cardScreeningTitle": "Screening and assessment",
+    "cardScreeningBody": "Early detection and monitoring with individual and group tests by age.",
+    "cardInterventionTitle": "Intervention programs",
+    "cardInterventionBody": "Pathways such as Preleo and Leetrea to build and strengthen reading skills.",
+    "cardResourcesTitle": "Resources and evidence",
+    "cardResourcesBody": "Materials, publications, and support for schools, teachers, and families."
+  },
+  "PublicLayout": {
+    "tagline": "Intervention, screening, and monitoring of oral language and reading.",
+    "footerNote": "Demonstration template without real content or operational link to the original platform."
+  },
+  "Pages": {
+    "whatIs": {
+      "title": "What is Leeduca",
+      "intro": "Leeduca is a project focused on preventing and addressing oral language and reading difficulties in schools through assessment, intervention, and monitoring.",
+      "sections": {
+        "purposeTitle": "Purpose",
+        "purposeBody": "Support early detection and evidence-based educational response.",
+        "schoolTitle": "School focus",
+        "schoolBody": "Tools designed for use in schools and coordination with professionals.",
+        "monitorTitle": "Monitoring",
+        "monitorBody": "Track progress to adjust supports and intervention programs."
+      }
+    },
+    "oralLanguage": {
+      "title": "Oral language and reading",
+      "intro": "Oral language development is the foundation of reading. This section would present fundamentals, warning signs, and preventive work lines.",
+      "blocks": {
+        "oralTitle": "Oral language",
+        "oralBody": "Phonological awareness, vocabulary, comprehension, and expression.",
+        "readingTitle": "Reading and writing",
+        "readingBody": "Decoding, fluency, reading comprehension, and writing.",
+        "supportTitle": "Educational supports",
+        "supportBody": "Guidance for early intervention and school-family coordination."
+      }
+    },
+    "intervention": {
+      "title": "Intervention programs",
+      "intro": "Space to describe stimulation and intervention programs. The MVP includes access to Preleo and Leetrea.",
+      "programs": {
+        "preleoTitle": "Preleo",
+        "preleoBody": "Oral language stimulation: universal program, intensification, review, and palette.",
+        "leetreaTitle": "Leetrea",
+        "leetreaBody": "Reading learning and consolidation with structured pathways."
+      }
+    },
+    "screening": {
+      "title": "Screening and reports",
+      "intro": "Area for early detection, assessment batteries, and follow-up reports to support educational decisions.",
+      "items": {
+        "individualTitle": "Universal individual screening",
+        "individualBody": "Individual application by age (3 to 8 years in the observed demo).",
+        "collectiveTitle": "Universal group screening",
+        "collectiveBody": "Group application by age (6 to 11 years in the observed demo).",
+        "reportsTitle": "Reports and monitoring",
+        "reportsBody": "Results, risk profiles, and progress (pending real data)."
+      }
+    },
+    "products": {
+      "title": "Products",
+      "intro": "Catalog of solutions, licenses, or services for schools. Content pending definition."
+    },
+    "resources": {
+      "title": "Resources",
+      "intro": "Publications, scientific articles, downloadable materials, and training resources.",
+      "links": {
+        "publications": "Publications",
+        "articles": "Scientific articles",
+        "materials": "Leeduca materials",
+        "blog": "Blog"
+      }
+    },
+    "team": {
+      "title": "Team",
+      "intro": "Presentation of the research, clinical, and educational team involved in the project. Information pending."
+    },
+    "blog": {
+      "title": "Blog",
+      "intro": "News, school experiences, and outreach on oral language and reading.",
+      "empty": "No posts published in this demo template."
+    },
+    "contact": {
+      "title": "Contact",
+      "intro": "Contact channels for schools, families, and professionals.",
+      "form": {
+        "name": "Name",
+        "email": "Email",
+        "center": "School",
+        "message": "Message",
+        "send": "Send inquiry (demo)",
+        "disclaimer": "Demo form: it does not send information."
+      }
+    },
+    "access": {
+      "title": "Access",
+      "intro": "Platform access for schools and professionals. In this MVP, access opens the demo environment directly.",
+      "userLabel": "Username",
+      "passwordLabel": "Password",
+      "submit": "Enter demo",
+      "note": "No real authentication. Use the button to explore platform screens."
+    },
+    "legal": {
+      "title": "Legal notice",
+      "intro": "Legal text pending adaptation to the service owner, purpose, and conditions."
+    },
+    "privacy": {
+      "title": "Privacy policy",
+      "intro": "Data processing information pending. Educational applications must define legal basis, purposes, retention, and rights."
+    },
+    "cookies": {
+      "title": "Cookie policy",
+      "intro": "Information about cookies and similar technologies pending real configuration."
+    },
+    "terms": {
+      "title": "Terms and conditions",
+      "intro": "Service terms pending drafting and review."
+    }
+  },
+  "Platform": {
+    "title": "Leeduca Platform",
+    "subtitle": "Demo environment with module navigation",
+    "userDemo": "Demo user: SCHOOL",
+    "universal": {
+      "hubIntro": "From this resource you can access all assessment, screening, and intervention services included in the template: individual and group screening, assessment batteries, Leetrea, and Preleo work lines.",
+      "servicesTitle": "Assessment and intervention services",
+      "preleoLinesTitle": "Preleo work lines",
+      "preleoLinesIntro": "Direct access to program modalities within the universal resource."
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "screeningIndividual": "Individual screening",
+      "screeningCollective": "Group screening",
+      "batteries": "Assessment batteries",
+      "preleo": "Preleo",
+      "leetrea": "Leetrea",
+      "exit": "Back to site"
+    },
+    "dashboard": {
+      "title": "School services",
+      "intro": "Select a system to explore the screens planned in the MVP.",
+      "cards": {
+        "screeningIndividual": "Universal individual screening by age (3–8 years).",
+        "screeningCollective": "Universal group screening by age (6–11 years).",
+        "batteries": "Individual assessment: reading, writing, oral language, and areas in development.",
+        "preleo": "Oral language stimulation with programs and resources.",
+        "leetrea": "Intervention for reading learning."
+      }
+    },
+    "screeningIndividual": {
+      "title": "Leeduca",
+      "intro": "Individual activities and practice for oral language and pre-reading development (MVP focused on age 4, based on the PRELEO didactic program).",
+      "ages": "Available age"
+    },
+    "screeningCollective": {
+      "title": "Universal group screening",
+      "intro": "Group application for screening. Select a grade/age.",
+      "ages": "Available ages"
+    },
+    "batteries": {
+      "title": "Individual assessment batteries",
+      "intro": "Set of tests to deepen the linguistic and reading profile.",
+      "areas": {
+        "readingWriting": "Reading and writing",
+        "phonological": "Phonological deficit",
+        "oral": "Oral language",
+        "visual": "Visual deficit",
+        "mathExec": "Math and executive functions"
+      }
+    },
+    "preleo": {
+      "title": "Preleo",
+      "intro": "Oral language stimulation program. Select a work line.",
+      "programs": {
+        "universal": "Universal program",
+        "intensificacion": "Intensification",
+        "repaso": "Review program",
+        "paleta": "Leeduca palette"
+      }
+    },
+    "leetrea": {
+      "title": "Leetrea",
+      "intro": "Reading learning program. Demo screen for pathways, sessions, and follow-up."
+    },
+    "agePage": {
+      "title": "Age: {age} years",
+      "intro": "Demo view for activities, tests, or materials for this group.",
+      "blocks": {
+        "activities": "Planned activities",
+        "assessment": "Assessment / record",
+        "results": "Results and reports"
+      }
+    },
+    "programPage": {
+      "title": "{program}",
+      "intro": "Demo view of the selected program within Preleo.",
+      "blocks": {
+        "objectives": "Objectives",
+        "sessions": "Sessions and materials",
+        "tracking": "Tracking"
+      }
+    }
+  }
+}
