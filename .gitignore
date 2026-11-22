@@ -32,6 +32,10 @@ yarn-error.log*
 .env*
 !.env.example
 
+# local database (turso/libsql)
+local.db
+local.db-*
+
 # vercel
 .vercel
 

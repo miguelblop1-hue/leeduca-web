@@ -1,10 +1,22 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { DemoBadge } from "@/components/ui/demo-badge";
+import { Card } from "@/components/ui/card";
 import { StudentTracker } from "@/features/seguimiento/student-tracker";
+import { getSeguimientoData } from "@/features/seguimiento/actions";
+
+export const dynamic = "force-dynamic";
 
 export default async function SeguimientoPage() {
   const common = await getTranslations("Common");
+
+  let initialData;
+  let error: string | null = null;
+  try {
+    initialData = await getSeguimientoData();
+  } catch (e) {
+    error = e instanceof Error ? e.message : "Error desconocido al cargar la base de datos.";
+  }
 
   return (
     <div className="space-y-6">
@@ -33,7 +45,17 @@ export default async function SeguimientoPage() {
         </div>
       </section>
 
-      <StudentTracker />
+      {error ? (
+        <Card className="border-danger/30 bg-danger/5 p-5">
+          <p className="font-medium text-danger">No se pudo cargar el seguimiento</p>
+          <p className="mt-1 text-sm text-muted">{error}</p>
+          <p className="mt-2 text-sm text-muted">
+            Comprueba TURSO_DATABASE_URL / TURSO_AUTH_TOKEN y ejecuta <code>npm run db:push</code>.
+          </p>
+        </Card>
+      ) : initialData ? (
+        <StudentTracker initialData={initialData} />
+      ) : null}
     </div>
   );
 }

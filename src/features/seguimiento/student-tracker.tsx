@@ -1,16 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
 import type { SeguimientoData, Student } from "./types";
 import {
-  addComment,
-  addStudent,
-  commentsForStudentOnDate,
-  deleteStudent,
-  loadSeguimientoData,
-} from "./storage";
+  createCommentAction,
+  createStudentAction,
+  deleteStudentAction,
+} from "./actions";
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -208,7 +206,7 @@ function CalendarModal({ student, data, onClose, onAddComment }: CalendarModalPr
   const canGoForward = weekStart.getTime() < currentWeekStart.getTime();
 
   const selectedComments = useMemo(
-    () => commentsForStudentOnDate(data, student.id, selectedDate),
+    () => commentsForStudentOnDateLocal(data, student.id, selectedDate),
     [data, student.id, selectedDate],
   );
 
@@ -389,52 +387,55 @@ function CalendarModal({ student, data, onClose, onAddComment }: CalendarModalPr
   );
 }
 
-export function StudentTracker() {
-  const [data, setData] = useState<SeguimientoData | null>(null);
+function commentsForStudentOnDateLocal(
+  data: SeguimientoData,
+  studentId: string,
+  date: string,
+) {
+  return data.comments
+    .filter((c) => c.studentId === studentId && c.date === date)
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+}
+
+export function StudentTracker({ initialData }: { initialData: SeguimientoData }) {
+  const [data, setData] = useState<SeguimientoData>(initialData);
   const [newName, setNewName] = useState("");
   const [commentStudent, setCommentStudent] = useState<Student | null>(null);
   const [calendarStudent, setCalendarStudent] = useState<Student | null>(null);
-
-  useEffect(() => {
-    const id = window.setTimeout(() => {
-      setData(loadSeguimientoData());
-    }, 0);
-    return () => window.clearTimeout(id);
-  }, []);
+  const [, startTransition] = useTransition();
 
   const todayKey = toDateKey(new Date());
 
   function handleAddStudent() {
     const name = newName.trim();
-    if (!name || !data) return;
-    setData(addStudent(data, name));
+    if (!name) return;
     setNewName("");
+    startTransition(async () => {
+      const next = await createStudentAction(name);
+      setData(next);
+    });
   }
 
   function handleSaveComment(studentId: string, date: string, text: string) {
-    if (!data) return;
-    setData(addComment(data, { studentId, date, text }));
+    startTransition(async () => {
+      const next = await createCommentAction({ studentId, date, text });
+      setData(next);
+    });
   }
 
   function handleDeleteStudent(studentId: string) {
-    if (!data) return;
     const student = data.students.find((s) => s.id === studentId);
     if (!student) return;
     const ok = window.confirm(
       `¿Eliminar a ${student.name} y todos sus comentarios? Esta acción no se puede deshacer.`,
     );
     if (!ok) return;
-    setData(deleteStudent(data, studentId));
     if (commentStudent?.id === studentId) setCommentStudent(null);
     if (calendarStudent?.id === studentId) setCalendarStudent(null);
-  }
-
-  if (!data) {
-    return (
-      <Card className="p-6">
-        <p className="text-sm text-muted">Cargando seguimiento…</p>
-      </Card>
-    );
+    startTransition(async () => {
+      const next = await deleteStudentAction(studentId);
+      setData(next);
+    });
   }
 
   return (
