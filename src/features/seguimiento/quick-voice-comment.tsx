@@ -122,32 +122,14 @@ export function QuickVoiceComment({ students }: { students: Student[] }) {
   const [isPending, startTransition] = useTransition();
   const recRef = useRef<SpeechRecognitionLike | null>(null);
   const transcriptRef = useRef("");
-  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const SILENCE_MS = 5000;
-
-  function clearSilenceTimer() {
-    if (silenceTimerRef.current) {
-      clearTimeout(silenceTimerRef.current);
-      silenceTimerRef.current = null;
-    }
-  }
-
-  function armSilenceTimer() {
-    clearSilenceTimer();
-    silenceTimerRef.current = setTimeout(() => {
-      if (recRef.current) stopAndProcess();
-    }, SILENCE_MS);
-  }
 
   useEffect(() => {
     return () => {
-      clearSilenceTimer();
       recRef.current?.stop();
     };
   }, []);
 
   function stopAndProcess() {
-    clearSilenceTimer();
     recRef.current?.stop();
     recRef.current = null;
     setListening(false);
@@ -182,10 +164,8 @@ export function QuickVoiceComment({ students }: { students: Student[] }) {
       }
       transcriptRef.current = full;
       setTranscript(full);
-      armSilenceTimer();
     };
     rec.onerror = (e) => {
-      clearSilenceTimer();
       setListening(false);
       recRef.current = null;
       if (e.error !== "no-speech" && e.error !== "aborted") {
@@ -195,7 +175,6 @@ export function QuickVoiceComment({ students }: { students: Student[] }) {
     rec.onend = () => {
       // if ended naturally while we think we're listening, process
       if (recRef.current === rec) {
-        clearSilenceTimer();
         recRef.current = null;
         setListening(false);
         const text = transcriptRef.current.trim();
@@ -212,7 +191,6 @@ export function QuickVoiceComment({ students }: { students: Student[] }) {
     try {
       rec.start();
       setListening(true);
-      armSilenceTimer();
     } catch {
       setError("No se pudo iniciar el dictado por voz.");
       recRef.current = null;
@@ -265,7 +243,7 @@ export function QuickVoiceComment({ students }: { students: Student[] }) {
         </button>
         <p className="text-sm text-muted">
           {listening
-            ? "Escuchando... di el comentario y el nombre del alumno. Pulsa para terminar o se cerrará tras unos segundos sin voz."
+            ? "Escuchando... di el comentario y el nombre del alumno. Pulsa para terminar."
             : "Pulsa el micrófono para dictar un comentario y asignarlo a un alumno hoy."}
         </p>
       </div>

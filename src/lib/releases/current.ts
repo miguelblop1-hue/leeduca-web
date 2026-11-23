@@ -4,10 +4,9 @@
  * entrada en docs/DEPLOY.md con cambios.
  */
 export const CURRENT_RELEASE = {
-  version: "0.1.6",
+  version: "0.1.7",
   date: "2026-11-23",
   changes: [
-    "Seguimiento: el micrófono de dictado rápido se cierra automáticamente tras unos segundos sin voz (manteniendo cierre manual).",
-    "Seguimiento: confirmación antes de eliminar un alumno o un comentario.",
+    "Seguimiento: eliminado el cierre automático por silencio del micrófono de dictado rápido; el cierre pasa a ser solo manual.",
   ],
 } as const;
