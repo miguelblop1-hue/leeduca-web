@@ -4,9 +4,9 @@
  * entrada en docs/DEPLOY.md con cambios.
  */
 export const CURRENT_RELEASE = {
-  version: "0.1.17",
+  version: "0.1.18",
   date: "2026-11-23",
   changes: [
-    "Seguimiento: cabecera simplificada, con micrófono más grande y explicación debajo.",
+    "Seguimiento: si se cancela una transcripción sin asignar alumno, se elimina la transcripción.",
   ],
 } as const;

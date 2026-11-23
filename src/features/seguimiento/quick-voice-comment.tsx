@@ -281,7 +281,10 @@ export function QuickVoiceComment({ students }: { students: Student[] }) {
             ))}
             <button
               type="button"
-              onClick={() => setPending(null)}
+              onClick={() => {
+                setPending(null);
+                setTranscript("");
+              }}
               className="rounded-lg border border-border/70 px-3 py-1.5 text-sm text-muted hover:bg-surface-sunken"
             >
               Cancelar
