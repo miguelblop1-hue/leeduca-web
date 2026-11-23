@@ -720,7 +720,7 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
                   else cardRefs.current.delete(student.id);
                 }}
                 className={cn(
-                  "flex flex-col gap-3 p-4 transition-all sm:flex-row sm:items-center sm:justify-between sm:p-5",
+                  "flex flex-row flex-wrap items-center justify-between gap-3 p-4 transition-all sm:p-5",
                   isDragging && "opacity-50",
                   isDragOver && "border-accent/60 ring-2 ring-accent/20",
                 )}
@@ -817,36 +817,35 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
                   <button
                     type="button"
                     onClick={() => setCommentStudent(student)}
-                    className="inline-flex items-center gap-2 rounded-lg border border-border/70 bg-surface px-3 py-2 text-sm font-medium transition-colors hover:bg-surface-sunken"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/70 bg-surface text-accent transition-colors hover:bg-surface-sunken"
+                    aria-label={`Añadir comentario a ${student.name}`}
+                    title="Añadir comentario"
                   >
-                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 text-accent" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
                       <path d="M3.5 4.75A1.75 1.75 0 0 1 5.25 3h9.5A1.75 1.75 0 0 1 16.5 4.75v7.5a1.75 1.75 0 0 1-1.75 1.75H6.56l-2.22 2.22A.75.75 0 0 1 3 15.69V4.75Z" />
                     </svg>
-                    Añadir comentario
                   </button>
                   <button
                     type="button"
                     onClick={() => setCalendarStudent(student)}
-                    className="inline-flex items-center gap-2 rounded-lg border border-border/70 bg-surface px-3 py-2 text-sm font-medium transition-colors hover:bg-surface-sunken"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/70 bg-surface text-accent transition-colors hover:bg-surface-sunken"
                     aria-label={`Ver agenda de ${student.name}`}
-                    title="Ver agenda"
+                    title="Agenda"
                   >
-                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 text-accent" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
                       <path fillRule="evenodd" d="M5.75 2a.75.75 0 0 1 .75.75V4h7V2.75a.75.75 0 0 1 1.5 0V4h.25A1.75 1.75 0 0 1 17 5.75v9.5A1.75 1.75 0 0 1 15.25 17H4.75A1.75 1.75 0 0 1 3 15.25v-9.5A1.75 1.75 0 0 1 4.75 4H5V2.75A.75.75 0 0 1 5.75 2Zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75Z" clipRule="evenodd" />
                     </svg>
-                    Agenda
                   </button>
                   <button
                     type="button"
                     onClick={() => handleDeleteStudent(student.id)}
-                    className="inline-flex items-center gap-2 rounded-lg border border-danger/30 bg-surface px-3 py-2 text-sm font-medium text-danger transition-colors hover:bg-danger/10"
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-danger/30 bg-surface text-danger transition-colors hover:bg-danger/10"
                     aria-label={`Eliminar a ${student.name}`}
                     title="Eliminar alumno"
                   >
                     <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
                       <path fillRule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022 1.005 11.36A2.75 2.75 0 0 0 7.759 19h4.482a2.75 2.75 0 0 0 2.74-2.508l1.005-11.36.149.022a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clipRule="evenodd" />
                     </svg>
-                    Eliminar
                   </button>
                 </div>
               </Card>

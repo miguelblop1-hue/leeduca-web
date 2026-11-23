@@ -4,9 +4,9 @@
  * entrada en docs/DEPLOY.md con cambios.
  */
 export const CURRENT_RELEASE = {
-  version: "0.1.2",
+  version: "0.1.3",
   date: "2026-11-23",
   changes: [
-    "Seguimiento: dictado por voz en comentarios del alumno (botón de micrófono, Web Speech API).",
+    "Seguimiento: acciones de alumno en modo icono (comentario, agenda, eliminar) para mejor alineación responsive.",
   ],
 } as const;
