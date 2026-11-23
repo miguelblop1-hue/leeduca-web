@@ -8,6 +8,7 @@ import {
   createCommentAction,
   createStudentAction,
   deleteStudentAction,
+  reorderStudentsAction,
 } from "./actions";
 
 function pad(n: number) {
@@ -438,6 +439,21 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
     });
   }
 
+  function handleMoveStudent(studentId: string, direction: "up" | "down") {
+    const idx = data.students.findIndex((s) => s.id === studentId);
+    if (idx < 0) return;
+    const targetIdx = direction === "up" ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= data.students.length) return;
+    const ordered = [...data.students];
+    const [moved] = ordered.splice(idx, 1);
+    ordered.splice(targetIdx, 0, moved);
+    setData({ ...data, students: ordered });
+    startTransition(async () => {
+      const next = await reorderStudentsAction(ordered.map((s) => s.id));
+      setData(next);
+    });
+  }
+
   return (
     <div className="space-y-6">
       <Card className="space-y-4 p-5 sm:p-6">
@@ -486,19 +502,59 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
         {data.students.length === 0 ? (
           <Card className="p-5 text-sm text-muted">No hay alumnos todavía. Añade el primero arriba.</Card>
         ) : (
-          data.students.map((student) => {
+          data.students.map((student, index) => {
             const commentCount = data.comments.filter((c) => c.studentId === student.id).length;
+            const isFirst = index === 0;
+            const isLast = index === data.students.length - 1;
             return (
               <Card key={student.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-                <div className="min-w-0">
-                  <p className="truncate text-base font-semibold">{student.name}</p>
-                  <p className="text-sm text-muted">
-                    {commentCount === 0
-                      ? "Sin comentarios"
-                      : commentCount === 1
-                        ? "1 comentario"
-                        : `${commentCount} comentarios`}
-                  </p>
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="flex shrink-0 flex-col gap-1">
+                    <button
+                      type="button"
+                      onClick={() => handleMoveStudent(student.id, "up")}
+                      disabled={isFirst}
+                      aria-label={`Mover a ${student.name} arriba`}
+                      title="Mover arriba"
+                      className={cn(
+                        "inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/70 transition-colors",
+                        isFirst
+                          ? "cursor-not-allowed text-muted/35"
+                          : "text-muted hover:bg-surface-sunken hover:text-foreground",
+                      )}
+                    >
+                      <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+                        <path fillRule="evenodd" d="M10 17a.75.75 0 0 1-.75-.75V5.612L6.29 8.77a.75.75 0 0 1-1.08-1.04l4.25-4.5a.75.75 0 0 1 1.08 0l4.25 4.5a.75.75 0 0 1-1.08 1.04L10.75 5.612V16.25A.75.75 0 0 1 10 17Z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleMoveStudent(student.id, "down")}
+                      disabled={isLast}
+                      aria-label={`Mover a ${student.name} abajo`}
+                      title="Mover abajo"
+                      className={cn(
+                        "inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/70 transition-colors",
+                        isLast
+                          ? "cursor-not-allowed text-muted/35"
+                          : "text-muted hover:bg-surface-sunken hover:text-foreground",
+                      )}
+                    >
+                      <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+                        <path fillRule="evenodd" d="M10 3a.75.75 0 0 1 .75.75v10.638l2.96-3.158a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 1 1 1.08-1.04l2.96 3.158V3.75A.75.75 0 0 1 10 3Z" clipRule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-base font-semibold">{student.name}</p>
+                    <p className="text-sm text-muted">
+                      {commentCount === 0
+                        ? "Sin comentarios"
+                        : commentCount === 1
+                          ? "1 comentario"
+                          : `${commentCount} comentarios`}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <button

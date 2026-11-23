@@ -29,7 +29,10 @@ function toComment(row: typeof seguimientoComment.$inferSelect): StudentComment 
 
 export async function getSeguimientoData(): Promise<SeguimientoData> {
   const [students, comments] = await Promise.all([
-    db.select().from(seguimientoStudent).orderBy(asc(seguimientoStudent.createdAt)),
+    db
+      .select()
+      .from(seguimientoStudent)
+      .orderBy(asc(seguimientoStudent.sortOrder), asc(seguimientoStudent.createdAt)),
     db.select().from(seguimientoComment).orderBy(asc(seguimientoComment.createdAt)),
   ]);
 
@@ -37,9 +40,9 @@ export async function getSeguimientoData(): Promise<SeguimientoData> {
   if (students.length === 0 && comments.length === 0) {
     const now = new Date();
     const defaults = [
-      { id: uid(), name: "Lucía", createdAt: now },
-      { id: uid(), name: "Mateo", createdAt: now },
-      { id: uid(), name: "Sofía", createdAt: now },
+      { id: uid(), name: "Lucía", sortOrder: 0, createdAt: now },
+      { id: uid(), name: "Mateo", sortOrder: 1, createdAt: now },
+      { id: uid(), name: "Sofía", sortOrder: 2, createdAt: now },
     ];
     await db.insert(seguimientoStudent).values(defaults);
     return {
@@ -57,9 +60,14 @@ export async function getSeguimientoData(): Promise<SeguimientoData> {
 export async function createStudentAction(name: string): Promise<SeguimientoData> {
   const trimmed = name.trim().slice(0, 80);
   if (trimmed) {
+    const existing = await db
+      .select({ sortOrder: seguimientoStudent.sortOrder })
+      .from(seguimientoStudent);
+    const maxOrder = existing.reduce((m, r) => Math.max(m, r.sortOrder ?? 0), -1);
     await db.insert(seguimientoStudent).values({
       id: uid(),
       name: trimmed,
+      sortOrder: maxOrder + 1,
       createdAt: new Date(),
     });
   }
@@ -87,6 +95,20 @@ export async function createCommentAction(input: {
 export async function deleteStudentAction(studentId: string): Promise<SeguimientoData> {
   if (studentId) {
     await db.delete(seguimientoStudent).where(eq(seguimientoStudent.id, studentId));
+  }
+  return getSeguimientoData();
+}
+
+export async function reorderStudentsAction(orderedIds: string[]): Promise<SeguimientoData> {
+  if (Array.isArray(orderedIds) && orderedIds.length > 0) {
+    await Promise.all(
+      orderedIds.map((id, index) =>
+        db
+          .update(seguimientoStudent)
+          .set({ sortOrder: index })
+          .where(eq(seguimientoStudent.id, id)),
+      ),
+    );
   }
   return getSeguimientoData();
 }

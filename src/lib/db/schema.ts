@@ -5,9 +5,13 @@ export const seguimientoStudent = sqliteTable(
   {
     id: text("id").primaryKey(),
     name: text("name").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
     createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   },
-  (table) => [index("seguimiento_student_created_idx").on(table.createdAt)],
+  (table) => [
+    index("seguimiento_student_created_idx").on(table.createdAt),
+    index("seguimiento_student_sort_idx").on(table.sortOrder),
+  ],
 );
 
 export const seguimientoComment = sqliteTable(
