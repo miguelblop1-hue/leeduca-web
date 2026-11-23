@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition, type DragEvent } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
 import type { SeguimientoData, Student } from "./types";
@@ -8,6 +8,7 @@ import {
   createCommentAction,
   createStudentAction,
   deleteStudentAction,
+  renameStudentAction,
   reorderStudentsAction,
 } from "./actions";
 
@@ -403,6 +404,8 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
   const [newName, setNewName] = useState("");
   const [commentStudent, setCommentStudent] = useState<Student | null>(null);
   const [calendarStudent, setCalendarStudent] = useState<Student | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
   const [, startTransition] = useTransition();
 
   const todayKey = toDateKey(new Date());
@@ -433,25 +436,68 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
     if (!ok) return;
     if (commentStudent?.id === studentId) setCommentStudent(null);
     if (calendarStudent?.id === studentId) setCalendarStudent(null);
+    if (editingId === studentId) {
+      setEditingId(null);
+      setEditingName("");
+    }
     startTransition(async () => {
       const next = await deleteStudentAction(studentId);
       setData(next);
     });
   }
 
-  function handleMoveStudent(studentId: string, direction: "up" | "down") {
-    const idx = data.students.findIndex((s) => s.id === studentId);
-    if (idx < 0) return;
-    const targetIdx = direction === "up" ? idx - 1 : idx + 1;
-    if (targetIdx < 0 || targetIdx >= data.students.length) return;
+  function handleRenameStudent(studentId: string) {
+    const name = editingName.trim();
+    if (!name) return;
+    setEditingId(null);
+    setEditingName("");
+    startTransition(async () => {
+      const next = await renameStudentAction(studentId, name);
+      setData(next);
+    });
+  }
+
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
+
+  function handleDragStart(id: string) {
+    setDragId(id);
+  }
+
+  function handleDragOver(e: DragEvent, overId: string) {
+    e.preventDefault();
+    if (!dragId || dragId === overId) return;
+    setDragOverId(overId);
+  }
+
+  function handleDrop(overId: string) {
+    if (!dragId || dragId === overId) {
+      setDragId(null);
+      setDragOverId(null);
+      return;
+    }
+    const from = data.students.findIndex((s) => s.id === dragId);
+    const to = data.students.findIndex((s) => s.id === overId);
+    if (from < 0 || to < 0) {
+      setDragId(null);
+      setDragOverId(null);
+      return;
+    }
     const ordered = [...data.students];
-    const [moved] = ordered.splice(idx, 1);
-    ordered.splice(targetIdx, 0, moved);
+    const [moved] = ordered.splice(from, 1);
+    ordered.splice(to, 0, moved);
     setData({ ...data, students: ordered });
+    setDragId(null);
+    setDragOverId(null);
     startTransition(async () => {
       const next = await reorderStudentsAction(ordered.map((s) => s.id));
       setData(next);
     });
+  }
+
+  function handleDragEnd() {
+    setDragId(null);
+    setDragOverId(null);
   }
 
   return (
@@ -502,51 +548,101 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
         {data.students.length === 0 ? (
           <Card className="p-5 text-sm text-muted">No hay alumnos todavía. Añade el primero arriba.</Card>
         ) : (
-          data.students.map((student, index) => {
+          data.students.map((student) => {
             const commentCount = data.comments.filter((c) => c.studentId === student.id).length;
-            const isFirst = index === 0;
-            const isLast = index === data.students.length - 1;
+            const isDragging = dragId === student.id;
+            const isDragOver = dragOverId === student.id && dragId !== student.id;
+            const isEditing = editingId === student.id;
             return (
-              <Card key={student.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+              <Card
+                key={student.id}
+                onDragOver={(e) => handleDragOver(e, student.id)}
+                onDrop={() => handleDrop(student.id)}
+                onDragEnd={handleDragEnd}
+                className={cn(
+                  "flex flex-col gap-3 p-4 transition-all sm:flex-row sm:items-center sm:justify-between sm:p-5",
+                  isDragging && "opacity-50",
+                  isDragOver && "border-accent/60 ring-2 ring-accent/20",
+                )}
+              >
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className="flex shrink-0 flex-col gap-1">
-                    <button
-                      type="button"
-                      onClick={() => handleMoveStudent(student.id, "up")}
-                      disabled={isFirst}
-                      aria-label={`Mover a ${student.name} arriba`}
-                      title="Mover arriba"
-                      className={cn(
-                        "inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/70 transition-colors",
-                        isFirst
-                          ? "cursor-not-allowed text-muted/35"
-                          : "text-muted hover:bg-surface-sunken hover:text-foreground",
-                      )}
-                    >
-                      <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
-                        <path fillRule="evenodd" d="M10 17a.75.75 0 0 1-.75-.75V5.612L6.29 8.77a.75.75 0 0 1-1.08-1.04l4.25-4.5a.75.75 0 0 1 1.08 0l4.25 4.5a.75.75 0 0 1-1.08 1.04L10.75 5.612V16.25A.75.75 0 0 1 10 17Z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleMoveStudent(student.id, "down")}
-                      disabled={isLast}
-                      aria-label={`Mover a ${student.name} abajo`}
-                      title="Mover abajo"
-                      className={cn(
-                        "inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/70 transition-colors",
-                        isLast
-                          ? "cursor-not-allowed text-muted/35"
-                          : "text-muted hover:bg-surface-sunken hover:text-foreground",
-                      )}
-                    >
-                      <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
-                        <path fillRule="evenodd" d="M10 3a.75.75 0 0 1 .75.75v10.638l2.96-3.158a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 1 1 1.08-1.04l2.96 3.158V3.75A.75.75 0 0 1 10 3Z" clipRule="evenodd" />
-                      </svg>
-                    </button>
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate text-base font-semibold">{student.name}</p>
+                  <button
+                    type="button"
+                    draggable
+                    onDragStart={() => handleDragStart(student.id)}
+                    onDragEnd={handleDragEnd}
+                    aria-label={`Arrastrar para reordenar a ${student.name}`}
+                    title="Mantén pulsado para reordenar"
+                    className="inline-flex h-9 w-9 shrink-0 cursor-grab items-center justify-center rounded-md border border-border/70 text-muted transition-colors hover:bg-surface-sunken hover:text-foreground active:cursor-grabbing"
+                  >
+                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+                      <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
+                    </svg>
+                  </button>
+                  <div className="min-w-0 flex-1">
+                    {isEditing ? (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <input
+                          type="text"
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handleRenameStudent(student.id);
+                            }
+                            if (e.key === "Escape") {
+                              setEditingId(null);
+                              setEditingName("");
+                            }
+                          }}
+                          maxLength={80}
+                          autoFocus
+                          className="min-w-0 flex-1 rounded-lg border border-border bg-surface-sunken/30 px-3 py-1.5 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRenameStudent(student.id)}
+                          disabled={!editingName.trim()}
+                          className={cn(
+                            "rounded-lg px-3 py-1.5 text-xs font-medium",
+                            editingName.trim()
+                              ? "bg-accent text-on-accent hover:bg-accent-strong"
+                              : "cursor-not-allowed bg-accent/40 text-on-accent/70",
+                          )}
+                        >
+                          Guardar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingId(null);
+                            setEditingName("");
+                          }}
+                          className="rounded-lg border border-border/70 px-3 py-1.5 text-xs font-medium hover:bg-surface-sunken"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex min-w-0 items-center gap-2">
+                        <p className="truncate text-base font-semibold">{student.name}</p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingId(student.id);
+                            setEditingName(student.name);
+                          }}
+                          aria-label={`Editar nombre de ${student.name}`}
+                          title="Editar nombre"
+                          className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-sunken hover:text-foreground"
+                        >
+                          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+                            <path d="m2.695 14.762-1.262 3.155a.5.5 0 0 0 .65.65l3.155-1.262a4 4 0 0 0 1.343-.886L17.5 5.501a2.121 2.121 0 0 0-3-3L3.58 13.419a4 4 0 0 0-.885 1.343Z" />
+                          </svg>
+                        </button>
+                      </div>
+                    )}
                     <p className="text-sm text-muted">
                       {commentCount === 0
                         ? "Sin comentarios"

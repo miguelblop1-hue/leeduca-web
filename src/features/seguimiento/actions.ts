@@ -112,3 +112,17 @@ export async function reorderStudentsAction(orderedIds: string[]): Promise<Segui
   }
   return getSeguimientoData();
 }
+
+export async function renameStudentAction(
+  studentId: string,
+  name: string,
+): Promise<SeguimientoData> {
+  const trimmed = name.trim().slice(0, 80);
+  if (studentId && trimmed) {
+    await db
+      .update(seguimientoStudent)
+      .set({ name: trimmed })
+      .where(eq(seguimientoStudent.id, studentId));
+  }
+  return getSeguimientoData();
+}
