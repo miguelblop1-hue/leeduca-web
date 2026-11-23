@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition, type DragEvent } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition, type PointerEvent } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
 import type { SeguimientoData, Student } from "./types";
@@ -459,43 +459,74 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
 
   const [dragId, setDragId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const dragIdRef = useRef<string | null>(null);
+  const dragOverIdRef = useRef<string | null>(null);
+  const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  function handleDragStart(id: string) {
-    setDragId(id);
-  }
-
-  function handleDragOver(e: DragEvent, overId: string) {
-    e.preventDefault();
-    if (!dragId || dragId === overId) return;
-    setDragOverId(overId);
-  }
-
-  function handleDrop(overId: string) {
-    if (!dragId || dragId === overId) {
-      setDragId(null);
-      setDragOverId(null);
-      return;
-    }
-    const from = data.students.findIndex((s) => s.id === dragId);
-    const to = data.students.findIndex((s) => s.id === overId);
-    if (from < 0 || to < 0) {
-      setDragId(null);
-      setDragOverId(null);
-      return;
-    }
-    const ordered = [...data.students];
-    const [moved] = ordered.splice(from, 1);
-    ordered.splice(to, 0, moved);
+  function persistOrder(ordered: typeof data.students) {
     setData({ ...data, students: ordered });
-    setDragId(null);
-    setDragOverId(null);
     startTransition(async () => {
       const next = await reorderStudentsAction(ordered.map((s) => s.id));
       setData(next);
     });
   }
 
+  function handlePointerDown(e: PointerEvent, id: string) {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    dragIdRef.current = id;
+    dragOverIdRef.current = null;
+    setDragId(id);
+    setDragOverId(null);
+  }
+
+  function handlePointerMove(e: PointerEvent) {
+    const activeId = dragIdRef.current;
+    if (!activeId) return;
+    let over: string | null = null;
+    for (const [id, el] of cardRefs.current.entries()) {
+      if (id === activeId) continue;
+      const rect = el.getBoundingClientRect();
+      if (e.clientY >= rect.top && e.clientY <= rect.bottom) {
+        const mid = rect.top + rect.height / 2;
+        over = id;
+        // if moving past midpoint, still target this card; ordering logic handles direction
+        void mid;
+        break;
+      }
+    }
+    if (over) {
+      dragOverIdRef.current = over;
+      setDragOverId(over);
+    }
+  }
+
+  function handlePointerUp(e: PointerEvent) {
+    const activeId = dragIdRef.current;
+    const over = dragOverIdRef.current;
+    if (activeId && over && activeId !== over) {
+      const from = data.students.findIndex((s) => s.id === activeId);
+      const to = data.students.findIndex((s) => s.id === over);
+      if (from >= 0 && to >= 0) {
+        const ordered = [...data.students];
+        const [moved] = ordered.splice(from, 1);
+        ordered.splice(to, 0, moved);
+        persistOrder(ordered);
+      }
+    }
+    dragIdRef.current = null;
+    dragOverIdRef.current = null;
+    setDragId(null);
+    setDragOverId(null);
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch {}
+  }
+
   function handleDragEnd() {
+    dragIdRef.current = null;
+    dragOverIdRef.current = null;
     setDragId(null);
     setDragOverId(null);
   }
@@ -556,9 +587,10 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
             return (
               <Card
                 key={student.id}
-                onDragOver={(e) => handleDragOver(e, student.id)}
-                onDrop={() => handleDrop(student.id)}
-                onDragEnd={handleDragEnd}
+                ref={(el) => {
+                  if (el) cardRefs.current.set(student.id, el);
+                  else cardRefs.current.delete(student.id);
+                }}
                 className={cn(
                   "flex flex-col gap-3 p-4 transition-all sm:flex-row sm:items-center sm:justify-between sm:p-5",
                   isDragging && "opacity-50",
@@ -568,12 +600,13 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
                 <div className="flex min-w-0 items-center gap-3">
                   <button
                     type="button"
-                    draggable
-                    onDragStart={() => handleDragStart(student.id)}
-                    onDragEnd={handleDragEnd}
+                    onPointerDown={(e) => handlePointerDown(e, student.id)}
+                    onPointerMove={handlePointerMove}
+                    onPointerUp={handlePointerUp}
+                    onPointerCancel={handleDragEnd}
                     aria-label={`Arrastrar para reordenar a ${student.name}`}
-                    title="Mantén pulsado para reordenar"
-                    className="inline-flex h-9 w-9 shrink-0 cursor-grab items-center justify-center rounded-md border border-border/70 text-muted transition-colors hover:bg-surface-sunken hover:text-foreground active:cursor-grabbing"
+                    title="Mantén pulsado y arrastra para reordenar"
+                    className="inline-flex h-9 w-9 shrink-0 cursor-grab touch-none items-center justify-center rounded-md border border-border/70 text-muted transition-colors hover:bg-surface-sunken hover:text-foreground active:cursor-grabbing"
                   >
                     <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
                       <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />

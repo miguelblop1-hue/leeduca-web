@@ -126,3 +126,16 @@ Mantener esta terminología y jerarquía al documentar o generar contenidos para
 - Cuando se generen ejercicios con IA o se creen contenidos nuevos, respetar los bloques: conciencia fonológica (silábica, identificación/conteo/manipulación/sílaba tónica), vocabulario, comprensión, fluidez, según proceda.
 - Mantener coherencia terminológica: “Actividad PRELEO”, “criterios de evaluación”, “estándares”, posiciones silábicas (inicial/final/media), etc.
 - Esta sección debe ampliarse con nuevas pautas que el usuario proporcione.
+
+## Releases y despliegues a producción
+- Cada subida a producción debe generar una **subversión/release** `MAJOR.MINOR.PATCH`.
+- Actualizar en cada release: `package.json` (`version`), `src/lib/releases/current.ts`, y `docs/DEPLOY.md` (entrada con versión, fecha/commit, cambios y verificación).
+- Commit de release con formato: `release: vX.Y.Z descripción breve`.
+- Antes de desplegar: `npx tsc --noEmit`, `npm run lint`, y verificación funcional de los cambios.
+
+## Base de datos (Turso + Drizzle) — reglas de seguridad
+- Stack: **Turso/libsql + Drizzle ORM + drizzle-kit** (misma stack que Sano App).
+- **Nunca usar `drizzle-kit push --force` contra producción/Turso con datos reales.** Puede causar pérdida de datos.
+- Para cambios de esquema en producción: usar migración segura (SQL `ALTER TABLE ... ADD COLUMN ... DEFAULT ...` cuando aplique, o `drizzle-kit generate` + `drizzle-kit migrate`), probar antes y verificar datos después.
+- `db:push` solo para desarrollo local/BD vacía; en BD con datos, preferir migraciones revisadas.
+- Antes de cualquier cambio de esquema en prod: confirmar respaldo/PITR disponible en Turso.
