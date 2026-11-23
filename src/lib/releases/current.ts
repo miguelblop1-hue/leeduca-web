@@ -4,9 +4,9 @@
  * entrada en docs/DEPLOY.md con cambios.
  */
 export const CURRENT_RELEASE = {
-  version: "0.1.15",
+  version: "0.1.16",
   date: "2026-11-23",
   changes: [
-    "Seguimiento: edición de comentarios desde la agenda del alumno.",
+    "Aviso de novedades: al entrar tras una nueva versión, se muestra un modal con los cambios de la release.",
   ],
 } as const;

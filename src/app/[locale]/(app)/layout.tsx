@@ -1,4 +1,5 @@
 import { Link } from "@/i18n/navigation";
+import { ReleaseNotice } from "@/components/layout/release-notice";
 import { APP_NAME } from "@/lib/app-name";
 
 export default async function AppLayout({
@@ -32,6 +33,7 @@ export default async function AppLayout({
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
         {children}
       </main>
+      <ReleaseNotice />
     </div>
   );
 }
