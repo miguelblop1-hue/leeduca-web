@@ -70,13 +70,14 @@ function formatDayMonth(key: string): string {
 const WEEKDAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie"];
 
 type ModalProps = {
-  title: string;
+  title: React.ReactNode;
+  ariaLabel?: string;
   onClose: () => void;
   children: React.ReactNode;
   wide?: boolean;
 };
 
-function Modal({ title, onClose, children, wide }: ModalProps) {
+function Modal({ title, ariaLabel, onClose, children, wide }: ModalProps) {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
@@ -95,7 +96,7 @@ function Modal({ title, onClose, children, wide }: ModalProps) {
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
-      aria-label={title}
+      aria-label={ariaLabel ?? (typeof title === "string" ? title : "Diálogo")}
       onMouseDown={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -325,9 +326,10 @@ type CalendarModalProps = {
   onClose: () => void;
   onAddComment: (date: string, text: string) => void;
   onDeleteComment: (commentId: string) => void;
+  onRename: (studentId: string, name: string) => void;
 };
 
-function CalendarModal({ student, data, onClose, onAddComment, onDeleteComment }: CalendarModalProps) {
+function CalendarModal({ student, data, onClose, onAddComment, onDeleteComment, onRename }: CalendarModalProps) {
   const today = useMemo(() => new Date(), []);
   const todayKey = toDateKey(today);
   const courseStart = useMemo(() => courseStartFor(today), [today]);
@@ -337,6 +339,8 @@ function CalendarModal({ student, data, onClose, onAddComment, onDeleteComment }
   const [weekStart, setWeekStart] = useState<Date>(() => startOfWeekMonday(new Date()));
   const [selectedDate, setSelectedDate] = useState<string>(todayKey);
   const [draft, setDraft] = useState("");
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState(student.name);
 
   const weekDays = useMemo(
     () => Array.from({ length: 5 }, (_, i) => addDays(weekStart, i)),
@@ -381,8 +385,74 @@ function CalendarModal({ student, data, onClose, onAddComment, onDeleteComment }
   const weekEnd = addDays(weekStart, 4);
   const rangeLabel = `${weekStart.toLocaleDateString("es-ES", { day: "numeric", month: "short" })} - ${weekEnd.toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" })}`;
 
+  function saveName() {
+    const name = nameDraft.trim();
+    if (!name) return;
+    onRename(student.id, name);
+    setEditingName(false);
+  }
+
   return (
-    <Modal title={`Agenda · ${student.name}`} onClose={onClose} wide>
+    <Modal
+      ariaLabel={`Agenda · ${student.name}`}
+      title={
+        <div className="flex min-w-0 items-center gap-2">
+          {editingName ? (
+            <>
+              <input
+                type="text"
+                value={nameDraft}
+                onChange={(e) => setNameDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    saveName();
+                  }
+                  if (e.key === "Escape") {
+                    setNameDraft(student.name);
+                    setEditingName(false);
+                  }
+                }}
+                maxLength={80}
+                autoFocus
+                className="min-w-0 w-48 max-w-full rounded-md border border-border bg-surface-sunken/30 px-2 py-1 text-base font-semibold outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              />
+              <button
+                type="button"
+                onClick={saveName}
+                disabled={!nameDraft.trim()}
+                className={cn(
+                  "shrink-0 rounded-md px-2 py-1 text-xs font-medium",
+                  nameDraft.trim() ? "bg-accent text-on-accent hover:bg-accent-strong" : "cursor-not-allowed bg-accent/40 text-on-accent/70",
+                )}
+              >
+                OK
+              </button>
+            </>
+          ) : (
+            <>
+              <span className="truncate">Agenda · {student.name}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setNameDraft(student.name);
+                  setEditingName(true);
+                }}
+                aria-label={`Editar nombre de ${student.name}`}
+                title="Editar nombre"
+                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-sunken hover:text-foreground"
+              >
+                <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+                  <path d="m2.695 14.762-1.262 3.155a.5.5 0 0 0 .65.65l3.155-1.262a4 4 0 0 0 1.343-.886L17.5 5.501a2.121 2.121 0 0 0-3-3L3.58 13.419a4 4 0 0 0-.885 1.343Z" />
+                </svg>
+              </button>
+            </>
+          )}
+        </div>
+      }
+      onClose={onClose}
+      wide
+    >
       <div className="space-y-5">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -576,9 +646,11 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
   }, [initialData]);
   const [commentStudent, setCommentStudent] = useState<Student | null>(null);
   const [calendarStudent, setCalendarStudent] = useState<Student | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingName, setEditingName] = useState("");
   const [, startTransition] = useTransition();
+
+  const liveCalendarStudent = calendarStudent
+    ? data.students.find((s) => s.id === calendarStudent.id) ?? null
+    : null;
 
   const todayKey = toDateKey(new Date());
 
@@ -615,23 +687,17 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
     if (!ok) return;
     if (commentStudent?.id === studentId) setCommentStudent(null);
     if (calendarStudent?.id === studentId) setCalendarStudent(null);
-    if (editingId === studentId) {
-      setEditingId(null);
-      setEditingName("");
-    }
     startTransition(async () => {
       const next = await deleteStudentAction(studentId);
       setData(next);
     });
   }
 
-  function handleRenameStudent(studentId: string) {
-    const name = editingName.trim();
-    if (!name) return;
-    setEditingId(null);
-    setEditingName("");
+  function handleRenameStudent(studentId: string, name: string) {
+    const trimmed = name.trim();
+    if (!trimmed) return;
     startTransition(async () => {
-      const next = await renameStudentAction(studentId, name);
+      const next = await renameStudentAction(studentId, trimmed);
       setData(next);
     });
   }
@@ -761,7 +827,6 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
           data.students.map((student) => {
             const isDragging = dragId === student.id;
             const isDragOver = dragOverId === student.id && dragId !== student.id;
-            const isEditing = editingId === student.id;
             return (
               <Card
                 key={student.id}
@@ -769,98 +834,55 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
                   if (el) cardRefs.current.set(student.id, el);
                   else cardRefs.current.delete(student.id);
                 }}
+                onClick={() => setCalendarStudent(student)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setCalendarStudent(student);
+                  }
+                }}
                 className={cn(
-                  "relative flex items-center gap-2 p-3 pr-10 transition-all sm:p-3 sm:pr-10",
+                  "relative flex cursor-pointer items-center gap-1.5 px-2.5 py-2 pr-8 transition-all hover:border-accent/40 hover:bg-surface-sunken/30",
                   isDragging && "opacity-50",
                   isDragOver && "border-accent/60 ring-2 ring-accent/20",
                 )}
+                aria-label={`Abrir agenda de ${student.name}`}
+                title={`Abrir agenda de ${student.name}`}
               >
                 <button
                   type="button"
-                  onPointerDown={(e) => handlePointerDown(e, student.id)}
+                  onClick={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => {
+                    e.stopPropagation();
+                    handlePointerDown(e, student.id);
+                  }}
                   onPointerMove={handlePointerMove}
                   onPointerUp={handlePointerUp}
                   onPointerCancel={handleDragEnd}
                   aria-label={`Arrastrar para reordenar a ${student.name}`}
                   title="Mantén pulsado y arrastra para reordenar"
-                  className="inline-flex h-8 w-8 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-sunken hover:text-foreground active:cursor-grabbing"
+                  className="inline-flex h-7 w-7 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-sunken hover:text-foreground active:cursor-grabbing"
                 >
-                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true">
                     <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
                   </svg>
                 </button>
 
-                <div className="min-w-0 flex-1">
-                  {isEditing ? (
-                    <div className="flex items-center gap-1.5">
-                      <input
-                        type="text"
-                        value={editingName}
-                        onChange={(e) => setEditingName(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            handleRenameStudent(student.id);
-                          }
-                          if (e.key === "Escape") {
-                            setEditingId(null);
-                            setEditingName("");
-                          }
-                        }}
-                        maxLength={80}
-                        autoFocus
-                        className="min-w-0 w-full rounded-md border border-border bg-surface-sunken/30 px-2 py-1 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleRenameStudent(student.id)}
-                        disabled={!editingName.trim()}
-                        className={cn(
-                          "shrink-0 rounded-md px-2 py-1 text-xs font-medium",
-                          editingName.trim()
-                            ? "bg-accent text-on-accent hover:bg-accent-strong"
-                            : "cursor-not-allowed bg-accent/40 text-on-accent/70",
-                        )}
-                      >
-                        OK
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex min-w-0 items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => setCalendarStudent(student)}
-                        className="min-w-0 truncate text-left text-sm font-semibold text-foreground hover:text-accent"
-                        title={`Abrir agenda de ${student.name}`}
-                      >
-                        {student.name}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditingId(student.id);
-                          setEditingName(student.name);
-                        }}
-                        aria-label={`Editar nombre de ${student.name}`}
-                        title="Editar nombre"
-                        className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-sunken hover:text-foreground"
-                      >
-                        <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true">
-                          <path d="m2.695 14.762-1.262 3.155a.5.5 0 0 0 .65.65l3.155-1.262a4 4 0 0 0 1.343-.886L17.5 5.501a2.121 2.121 0 0 0-3-3L3.58 13.419a4 4 0 0 0-.885 1.343Z" />
-                        </svg>
-                      </button>
-                    </div>
-                  )}
-                </div>
+                <p className="min-w-0 flex-1 truncate text-xs font-semibold uppercase tracking-wide text-foreground">{student.name}</p>
 
                 <button
                   type="button"
-                  onClick={() => handleDeleteStudent(student.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteStudent(student.id);
+                  }}
                   aria-label={`Eliminar a ${student.name}`}
                   title="Eliminar alumno"
-                  className="absolute right-1.5 top-1.5 inline-flex h-6 w-6 items-center justify-center rounded-md text-muted transition-colors hover:bg-danger/10 hover:text-danger"
+                  className="absolute right-1 top-1 inline-flex h-5 w-5 items-center justify-center rounded-md text-muted transition-colors hover:bg-danger/10 hover:text-danger"
                 >
-                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true">
                     <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
                   </svg>
                 </button>
@@ -882,15 +904,16 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
         />
       ) : null}
 
-      {calendarStudent ? (
+      {liveCalendarStudent ? (
         <CalendarModal
-          student={calendarStudent}
+          student={liveCalendarStudent}
           data={data}
           onClose={() => setCalendarStudent(null)}
           onAddComment={(date, text) => {
-            handleSaveComment(calendarStudent.id, date, text);
+            handleSaveComment(liveCalendarStudent.id, date, text);
           }}
           onDeleteComment={handleDeleteComment}
+          onRename={handleRenameStudent}
         />
       ) : null}
     </div>

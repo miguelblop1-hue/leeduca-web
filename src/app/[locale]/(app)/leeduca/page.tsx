@@ -14,6 +14,27 @@ export default async function LeeducaPage() {
 
   return (
     <div className="space-y-8">
+      <section>
+        <Link href="/leeduca/seguimiento" className="group block">
+          <Card className="flex items-center gap-4 p-5 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:border-accent/40 group-hover:shadow-[var(--shadow-glow)] sm:p-6">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-accent/12 text-accent">
+              <svg viewBox="0 0 20 20" fill="currentColor" className="h-6 w-6" aria-hidden="true">
+                <path fillRule="evenodd" d="M5.75 2a.75.75 0 0 1 .75.75V4h7V2.75a.75.75 0 0 1 1.5 0V4h.25A1.75 1.75 0 0 1 17 5.75v9.5A1.75 1.75 0 0 1 15.25 17H4.75A1.75 1.75 0 0 1 3 15.25v-9.5A1.75 1.75 0 0 1 4.75 4H5V2.75A.75.75 0 0 1 5.75 2Zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75Z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="min-w-0">
+              <p className="text-lg font-semibold tracking-tight">Seguimiento del alumnado</p>
+              <p className="mt-0.5 text-sm text-muted">
+                Registra comentarios por alumno y consulta su agenda semanal.
+              </p>
+            </div>
+            <svg viewBox="0 0 20 20" fill="currentColor" className="ml-auto h-5 w-5 shrink-0 text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-accent" aria-hidden="true">
+              <path fillRule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.638L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.158-3.96H3.75A.75.75 0 0 1 3 10Z" clipRule="evenodd" />
+            </svg>
+          </Card>
+        </Link>
+      </section>
+
       <section className="hero-gradient relative overflow-hidden rounded-3xl border border-border/70 p-6 shadow-[var(--shadow-soft)] sm:p-8">
         <div
           aria-hidden
@@ -28,6 +49,7 @@ export default async function LeeducaPage() {
           <p className="max-w-3xl text-pretty text-base text-muted sm:text-lg">{t("intro")}</p>
         </div>
       </section>
+
       <section className="space-y-4">
         <h2 className="text-lg font-semibold tracking-tight sm:text-xl">{t("ages")}</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -75,27 +97,6 @@ export default async function LeeducaPage() {
               </Link>
             );
           })}
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold tracking-tight sm:text-xl">Otros servicios</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Link href="/leeduca/seguimiento" className="group">
-            <Card className="flex h-full flex-col gap-3 p-5 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:border-accent/40 group-hover:shadow-[var(--shadow-glow)] sm:p-6">
-              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent/12 text-accent">
-                <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5" aria-hidden="true">
-                  <path fillRule="evenodd" d="M5.75 2a.75.75 0 0 1 .75.75V4h7V2.75a.75.75 0 0 1 1.5 0V4h.25A1.75 1.75 0 0 1 17 5.75v9.5A1.75 1.75 0 0 1 15.25 17H4.75A1.75 1.75 0 0 1 3 15.25v-9.5A1.75 1.75 0 0 1 4.75 4H5V2.75A.75.75 0 0 1 5.75 2Zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75Z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-base font-semibold">Seguimiento del alumnado</p>
-                <p className="mt-1 text-sm text-muted">
-                  Registra comentarios por alumno y consulta su agenda semanal.
-                </p>
-              </div>
-            </Card>
-          </Link>
         </div>
       </section>
     </div>
