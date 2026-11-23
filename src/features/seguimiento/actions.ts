@@ -106,6 +106,17 @@ export async function deleteCommentAction(commentId: string): Promise<Seguimient
   return getSeguimientoData();
 }
 
+export async function updateCommentAction(commentId: string, text: string): Promise<SeguimientoData> {
+  const next = text.trim().slice(0, 1000);
+  if (commentId && next) {
+    await db
+      .update(seguimientoComment)
+      .set({ text: next })
+      .where(eq(seguimientoComment.id, commentId));
+  }
+  return getSeguimientoData();
+}
+
 export async function reorderStudentsAction(orderedIds: string[]): Promise<SeguimientoData> {
   if (Array.isArray(orderedIds) && orderedIds.length > 0) {
     await Promise.all(

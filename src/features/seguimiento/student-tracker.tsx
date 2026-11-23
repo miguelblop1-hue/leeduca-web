@@ -9,6 +9,7 @@ import {
   createStudentAction,
   deleteCommentAction,
   deleteStudentAction,
+  updateCommentAction,
   renameStudentAction,
   reorderStudentsAction,
 } from "./actions";
@@ -326,10 +327,11 @@ type CalendarModalProps = {
   onClose: () => void;
   onAddComment: (date: string, text: string) => void;
   onDeleteComment: (commentId: string) => void;
+  onUpdateComment: (commentId: string, text: string) => void;
   onRename: (studentId: string, name: string) => void;
 };
 
-function CalendarModal({ student, data, onClose, onAddComment, onDeleteComment, onRename }: CalendarModalProps) {
+function CalendarModal({ student, data, onClose, onAddComment, onDeleteComment, onUpdateComment, onRename }: CalendarModalProps) {
   const today = useMemo(() => new Date(), []);
   const todayKey = toDateKey(today);
   const courseStart = useMemo(() => courseStartFor(today), [today]);
@@ -341,6 +343,8 @@ function CalendarModal({ student, data, onClose, onAddComment, onDeleteComment, 
   const [draft, setDraft] = useState("");
   const [editingName, setEditingName] = useState(false);
   const [nameDraft, setNameDraft] = useState(student.name);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editingCommentText, setEditingCommentText] = useState("");
 
   const weekDays = useMemo(
     () => Array.from({ length: 5 }, (_, i) => addDays(weekStart, i)),
@@ -554,27 +558,87 @@ function CalendarModal({ student, data, onClose, onAddComment, onDeleteComment, 
               <ul className="space-y-2">
                 {selectedComments.map((c) => (
                   <li key={c.id} className="rounded-lg border border-border/60 bg-surface px-3 py-2.5">
-                    <div className="flex items-start justify-between gap-3">
-                      <p className="min-w-0 flex-1 text-sm whitespace-pre-wrap">{c.text}</p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (window.confirm("¿Eliminar este comentario? Esta acción no se puede deshacer.")) {
-                            onDeleteComment(c.id);
-                          }
-                        }}
-                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-danger/30 text-danger transition-colors hover:bg-danger/10"
-                        aria-label="Eliminar comentario"
-                        title="Eliminar comentario"
-                      >
-                        <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
-                          <path fillRule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022 1.005 11.36A2.75 2.75 0 0 0 7.759 19h4.482a2.75 2.75 0 0 0 2.74-2.508l1.005-11.36.149.022a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clipRule="evenodd" />
-                        </svg>
-                      </button>
-                    </div>
-                    <p className="mt-1 text-xs text-muted">
-                      Añadido el {formatDayMonth(c.date)} · {formatTime(c.createdAt)}
-                    </p>
+                    {editingCommentId === c.id ? (
+                      <div className="space-y-2">
+                        <textarea
+                          value={editingCommentText}
+                          onChange={(e) => setEditingCommentText(e.target.value)}
+                          rows={3}
+                          maxLength={1000}
+                          autoFocus
+                          className="w-full rounded-lg border border-border bg-surface-sunken/30 px-3 py-2 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                        />
+                        <div className="flex justify-end gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingCommentId(null);
+                              setEditingCommentText("");
+                            }}
+                            className="rounded-md border border-border/70 px-3 py-1.5 text-xs font-medium hover:bg-surface-sunken"
+                          >
+                            Cancelar
+                          </button>
+                          <button
+                            type="button"
+                            disabled={!editingCommentText.trim()}
+                            onClick={() => {
+                              const t = editingCommentText.trim();
+                              if (!t) return;
+                              onUpdateComment(c.id, t);
+                              setEditingCommentId(null);
+                              setEditingCommentText("");
+                            }}
+                            className={cn(
+                              "rounded-md px-3 py-1.5 text-xs font-medium",
+                              editingCommentText.trim() ? "bg-accent text-on-accent hover:bg-accent-strong" : "cursor-not-allowed bg-accent/40 text-on-accent/70",
+                            )}
+                          >
+                            Guardar
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="min-w-0 flex-1 text-sm whitespace-pre-wrap">{c.text}</p>
+                          <div className="flex shrink-0 items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingCommentId(c.id);
+                                setEditingCommentText(c.text);
+                              }}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/70 text-muted transition-colors hover:bg-surface-sunken hover:text-foreground"
+                              aria-label="Editar comentario"
+                              title="Editar comentario"
+                            >
+                              <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+                                <path d="m2.695 14.762-1.262 3.155a.5.5 0 0 0 .65.65l3.155-1.262a4 4 0 0 0 1.343-.886L17.5 5.501a2.121 2.121 0 0 0-3-3L3.58 13.419a4 4 0 0 0-.885 1.343Z" />
+                              </svg>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (window.confirm("¿Eliminar este comentario? Esta acción no se puede deshacer.")) {
+                                  onDeleteComment(c.id);
+                                }
+                              }}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-danger/30 text-danger transition-colors hover:bg-danger/10"
+                              aria-label="Eliminar comentario"
+                              title="Eliminar comentario"
+                            >
+                              <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+                                <path fillRule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022 1.005 11.36A2.75 2.75 0 0 0 7.759 19h4.482a2.75 2.75 0 0 0 2.74-2.508l1.005-11.36.149.022a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clipRule="evenodd" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+                        <p className="mt-1 text-xs text-muted">
+                          Añadido el {formatDayMonth(c.date)} · {formatTime(c.createdAt)}
+                        </p>
+                      </>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -836,6 +900,13 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
     });
   }
 
+  function handleUpdateComment(commentId: string, text: string) {
+    startTransition(async () => {
+      const next = await updateCommentAction(commentId, text);
+      setData(next);
+    });
+  }
+
   function handleDeleteStudent(studentId: string) {
     const student = data.students.find((s) => s.id === studentId);
     if (!student) return;
@@ -1092,6 +1163,7 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
             handleSaveComment(liveCalendarStudent.id, date, text);
           }}
           onDeleteComment={handleDeleteComment}
+          onUpdateComment={handleUpdateComment}
           onRename={handleRenameStudent}
         />
       ) : null}
