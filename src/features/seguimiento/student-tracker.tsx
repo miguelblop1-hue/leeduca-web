@@ -727,6 +727,7 @@ function ReportModal({ mode, data, onClose }: ReportModalProps) {
   const todayKey = toDateKey(today);
   const [weekStart, setWeekStart] = useState(() => startOfWeekMonday(today));
   const [monthStart, setMonthStart] = useState(() => startOfMonth(today));
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const minWeek = useMemo(() => startOfWeekMonday(courseStartFor(today)), [today]);
   const currentWeek = useMemo(() => startOfWeekMonday(today), [today]);
@@ -756,7 +757,43 @@ function ReportModal({ mode, data, onClose }: ReportModalProps) {
     });
   }, [data, period]);
 
-  const totalMentions = reportRows.reduce((acc, r) => acc + r.comments.length, 0);
+  const allCommentIds = useMemo(() => reportRows.flatMap((r) => r.comments.map((c) => c.id)), [reportRows]);
+  const allSelected = allCommentIds.length > 0 && allCommentIds.every((id) => selectedIds.has(id));
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset selection when period changes
+    setSelectedIds(new Set(allCommentIds));
+  }, [allCommentIds]);
+
+  const selectedMentions = reportRows.reduce((acc, r) => acc + r.comments.filter((c) => selectedIds.has(c.id)).length, 0);
+
+  function toggleAll() {
+    setSelectedIds(allSelected ? new Set() : new Set(allCommentIds));
+  }
+
+  function toggleStudent(studentId: string) {
+    const row = reportRows.find((r) => r.student.id === studentId);
+    if (!row) return;
+    const ids = row.comments.map((c) => c.id);
+    const allStudentSelected = ids.length > 0 && ids.every((id) => selectedIds.has(id));
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      for (const id of ids) {
+        if (allStudentSelected) next.delete(id);
+        else next.add(id);
+      }
+      return next;
+    });
+  }
+
+  function toggleComment(commentId: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(commentId)) next.delete(commentId);
+      else next.add(commentId);
+      return next;
+    });
+  }
 
   function buildReportText() {
     const lines: string[] = [];
@@ -764,20 +801,19 @@ function ReportModal({ mode, data, onClose }: ReportModalProps) {
     lines.push(period.label);
     lines.push(`Generado: ${formatLongDate(todayKey)}`);
     lines.push("");
-    lines.push(`Total menciones/comentarios: ${totalMentions}`);
+    lines.push(`Total menciones/comentarios seleccionados: ${selectedMentions}`);
     lines.push("");
     for (const row of reportRows) {
+      const selectedComments = row.comments.filter((c) => selectedIds.has(c.id));
+      if (selectedComments.length === 0) continue;
       lines.push(`=== ${row.student.name.toUpperCase()} ===`);
-      lines.push(`Menciones: ${row.comments.length}`);
-      if (row.comments.length === 0) {
-        lines.push("Sin comentarios en el periodo.");
-      } else {
-        for (const c of row.comments) {
-          lines.push(`- [${formatLongDate(c.date)}] ${c.text}`);
-        }
+      lines.push(`Menciones: ${selectedComments.length}`);
+      for (const c of selectedComments) {
+        lines.push(`- [${formatLongDate(c.date)}] ${c.text}`);
       }
       lines.push("");
     }
+    if (selectedMentions === 0) lines.push("No hay comentarios seleccionados en el periodo.");
     return lines.join("\n");
   }
 
@@ -828,29 +864,70 @@ function ReportModal({ mode, data, onClose }: ReportModalProps) {
           </div>
         </div>
 
-        <p className="text-sm text-muted">Total menciones/comentarios: <span className="font-medium text-foreground">{totalMentions}</span></p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted">
+            Seleccionados: <span className="font-medium text-foreground">{selectedMentions}</span> / {allCommentIds.length} menciones
+          </p>
+          <button
+            type="button"
+            onClick={toggleAll}
+            className={cn(
+              "rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors",
+              allSelected ? "border-accent/40 bg-accent-soft text-accent" : "border-border/70 hover:bg-surface-sunken",
+            )}
+          >
+            {allSelected ? "Todos seleccionados" : "Seleccionar todos"}
+          </button>
+        </div>
 
         <div className="max-h-[60vh] space-y-3 overflow-auto pr-1">
-          {reportRows.map(({ student, comments }) => (
-            <div key={student.id} className="rounded-xl border border-border/60 bg-surface-sunken/20 p-4">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h3 className="font-semibold uppercase tracking-wide">{student.name}</h3>
-                <span className="text-sm text-muted">{comments.length} {comments.length === 1 ? "mención" : "menciones"}</span>
+          {reportRows.map(({ student, comments }) => {
+            const studentIds = comments.map((c) => c.id);
+            const studentAllSelected = studentIds.length > 0 && studentIds.every((id) => selectedIds.has(id));
+            const selectedCount = comments.filter((c) => selectedIds.has(c.id)).length;
+            return (
+              <div key={student.id} className="rounded-xl border border-border/60 bg-surface-sunken/20 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={studentAllSelected}
+                      disabled={comments.length === 0}
+                      onChange={() => toggleStudent(student.id)}
+                      className="h-4 w-4 accent-[var(--accent)]"
+                    />
+                    <span className="font-semibold uppercase tracking-wide">{student.name}</span>
+                  </label>
+                  <span className="text-sm text-muted">{selectedCount}/{comments.length} {comments.length === 1 ? "mención" : "menciones"}</span>
+                </div>
+                {comments.length === 0 ? (
+                  <p className="mt-2 text-sm text-muted">Sin comentarios en el periodo.</p>
+                ) : (
+                  <ul className="mt-2 space-y-2">
+                    {comments.map((c) => {
+                      const checked = selectedIds.has(c.id);
+                      return (
+                        <li key={c.id} className="text-sm">
+                          <label className="flex items-start gap-2">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => toggleComment(c.id)}
+                              className="mt-0.5 h-4 w-4 accent-[var(--accent)]"
+                            />
+                            <span className={cn(!checked && "opacity-50")}>
+                              <span className="font-medium text-muted">[{formatLongDate(c.date)}]</span>{" "}
+                              <span className="whitespace-pre-wrap">{c.text}</span>
+                            </span>
+                          </label>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
               </div>
-              {comments.length === 0 ? (
-                <p className="mt-2 text-sm text-muted">Sin comentarios en el periodo.</p>
-              ) : (
-                <ul className="mt-2 space-y-2">
-                  {comments.map((c) => (
-                    <li key={c.id} className="text-sm">
-                      <span className="font-medium text-muted">[{formatLongDate(c.date)}]</span>{" "}
-                      <span className="whitespace-pre-wrap">{c.text}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </Modal>
@@ -1007,22 +1084,30 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => setReportMode("weekly")}
-          className="inline-flex items-center gap-2 rounded-xl border border-border/70 bg-surface px-4 py-2.5 text-sm font-medium transition-colors hover:bg-surface-sunken hover:text-accent"
-        >
-          Informe semanal
-        </button>
-        <button
-          type="button"
-          onClick={() => setReportMode("monthly")}
-          className="inline-flex items-center gap-2 rounded-xl border border-border/70 bg-surface px-4 py-2.5 text-sm font-medium transition-colors hover:bg-surface-sunken hover:text-accent"
-        >
-          Informe mensual
-        </button>
-      </div>
+      <Card className="space-y-4 p-5 sm:p-6">
+        <div>
+          <h2 className="text-lg font-semibold">Informe</h2>
+          <p className="mt-1 text-sm text-muted">
+            Descarga informes semanales o mensuales con la relación de comentarios de todos los alumnos seleccionados en el periodo.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setReportMode("weekly")}
+            className="inline-flex items-center gap-2 rounded-xl border border-border/70 bg-surface px-4 py-2.5 text-sm font-medium transition-colors hover:bg-surface-sunken hover:text-accent"
+          >
+            Informe semanal
+          </button>
+          <button
+            type="button"
+            onClick={() => setReportMode("monthly")}
+            className="inline-flex items-center gap-2 rounded-xl border border-border/70 bg-surface px-4 py-2.5 text-sm font-medium transition-colors hover:bg-surface-sunken hover:text-accent"
+          >
+            Informe mensual
+          </button>
+        </div>
+      </Card>
 
       <Card className="space-y-4 p-5 sm:p-6">
         <div>

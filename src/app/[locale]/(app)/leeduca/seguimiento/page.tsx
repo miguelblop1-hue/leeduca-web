@@ -27,13 +27,16 @@ export default async function SeguimientoPage() {
         <span aria-hidden>←</span> {common("backToPlatform")}
       </Link>
 
-      <section className="space-y-4 py-2">
+      <Card className="space-y-4 p-5 sm:p-6">
+        <div>
+          <h2 className="text-lg font-semibold">Seguimiento de alumnos</h2>
+          <p className="mt-1 text-sm text-muted">
+            Registra comentarios por alumno, consulta la agenda semanal (lunes a viernes) y añade
+            observaciones en días anteriores desde el inicio de curso.
+          </p>
+        </div>
         <QuickVoiceComment students={initialData?.students ?? []} />
-        <p className="mx-auto max-w-2xl text-center text-sm text-muted">
-          Registra comentarios por alumno, consulta la agenda semanal (lunes a viernes) y añade
-          observaciones en días anteriores desde el inicio de curso.
-        </p>
-      </section>
+      </Card>
 
       {error ? (
         <Card className="border-danger/30 bg-danger/5 p-5">
