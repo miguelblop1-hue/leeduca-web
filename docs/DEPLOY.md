@@ -11,6 +11,13 @@ No usar `drizzle-kit push --force` contra producciÃ³n. Para cambios de esquema
 
 ## Despliegues
 
+### v0.1.12 â€” 2026-11-23
+- **Commit**: `79b12c2`
+- **Cambios**:
+  - Interfaz: se fuerza modo claro y se elimina la opciÃ³n/cambio a modo oscuro (ThemeToggle, script de tema, estilos dark).
+- **BD**: sin cambios de esquema.
+- **VerificaciÃ³n**: `npx tsc --noEmit`, `npm run lint`, deploy Vercel prod.
+
 ### v0.1.11 â€” 2026-11-23
 - **Commit**: `4c2b187`
 - **Cambios**:
@@ -95,6 +102,7 @@ No usar `drizzle-kit push --force` contra producciÃ³n. Para cambios de esquema
 
 ### v0.1.0 â€” base
 - MVP inicial Leeduca (4 aÃ±os, ejercicios, seguimiento bÃ¡sico, Turso/Drizzle).
+
 
 
 

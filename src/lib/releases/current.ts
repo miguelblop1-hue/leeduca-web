@@ -4,9 +4,9 @@
  * entrada en docs/DEPLOY.md con cambios.
  */
 export const CURRENT_RELEASE = {
-  version: "0.1.11",
+  version: "0.1.12",
   date: "2026-11-23",
   changes: [
-    "Seguimiento: tarjetas de alumno aún más compactas y X de eliminar centrada verticalmente a la derecha.",
+    "Interfaz: modo claro fijo; se elimina el selector de modo oscuro.",
   ],
 } as const;

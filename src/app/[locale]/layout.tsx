@@ -43,17 +43,13 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
   const messages = await getMessages();
 
-  const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t!=='light'&&t!=='dark'){t='light';}document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t;}catch(e){document.documentElement.dataset.theme='light';document.documentElement.style.colorScheme='light';}})();`;
-
   return (
     <html
       lang={locale}
-      suppressHydrationWarning
+      data-theme="light"
+      style={{ colorScheme: "light" }}
       className={`${geistSans.variable} h-full antialiased`}
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      </head>
       <body className="flex min-h-full flex-col font-sans text-foreground">
         <NextIntlClientProvider messages={messages}>
           {children}

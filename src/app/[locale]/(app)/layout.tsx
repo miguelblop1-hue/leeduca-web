@@ -1,5 +1,4 @@
 import { Link } from "@/i18n/navigation";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { APP_NAME } from "@/lib/app-name";
 
 export default async function AppLayout({
@@ -28,7 +27,6 @@ export default async function AppLayout({
               </p>
             </span>
           </Link>
-          <ThemeToggle />
         </div>
       </header>
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
