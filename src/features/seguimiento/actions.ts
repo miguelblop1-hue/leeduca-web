@@ -99,6 +99,13 @@ export async function deleteStudentAction(studentId: string): Promise<Seguimient
   return getSeguimientoData();
 }
 
+export async function deleteCommentAction(commentId: string): Promise<SeguimientoData> {
+  if (commentId) {
+    await db.delete(seguimientoComment).where(eq(seguimientoComment.id, commentId));
+  }
+  return getSeguimientoData();
+}
+
 export async function reorderStudentsAction(orderedIds: string[]): Promise<SeguimientoData> {
   if (Array.isArray(orderedIds) && orderedIds.length > 0) {
     await Promise.all(

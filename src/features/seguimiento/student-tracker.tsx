@@ -7,6 +7,7 @@ import type { SeguimientoData, Student } from "./types";
 import {
   createCommentAction,
   createStudentAction,
+  deleteCommentAction,
   deleteStudentAction,
   renameStudentAction,
   reorderStudentsAction,
@@ -303,9 +304,10 @@ type CalendarModalProps = {
   data: SeguimientoData;
   onClose: () => void;
   onAddComment: (date: string, text: string) => void;
+  onDeleteComment: (commentId: string) => void;
 };
 
-function CalendarModal({ student, data, onClose, onAddComment }: CalendarModalProps) {
+function CalendarModal({ student, data, onClose, onAddComment, onDeleteComment }: CalendarModalProps) {
   const today = useMemo(() => new Date(), []);
   const todayKey = toDateKey(today);
   const courseStart = useMemo(() => courseStartFor(today), [today]);
@@ -462,7 +464,24 @@ function CalendarModal({ student, data, onClose, onAddComment }: CalendarModalPr
               <ul className="space-y-2">
                 {selectedComments.map((c) => (
                   <li key={c.id} className="rounded-lg border border-border/60 bg-surface px-3 py-2.5">
-                    <p className="text-sm whitespace-pre-wrap">{c.text}</p>
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="min-w-0 flex-1 text-sm whitespace-pre-wrap">{c.text}</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm("¿Eliminar este comentario? Esta acción no se puede deshacer.")) {
+                            onDeleteComment(c.id);
+                          }
+                        }}
+                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-danger/30 text-danger transition-colors hover:bg-danger/10"
+                        aria-label="Eliminar comentario"
+                        title="Eliminar comentario"
+                      >
+                        <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+                          <path fillRule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022 1.005 11.36A2.75 2.75 0 0 0 7.759 19h4.482a2.75 2.75 0 0 0 2.74-2.508l1.005-11.36.149.022a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
                     <p className="mt-1 text-xs text-muted">
                       Añadido el {formatDayMonth(c.date)} · {formatTime(c.createdAt)}
                     </p>
@@ -556,6 +575,13 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
   function handleSaveComment(studentId: string, date: string, text: string) {
     startTransition(async () => {
       const next = await createCommentAction({ studentId, date, text });
+      setData(next);
+    });
+  }
+
+  function handleDeleteComment(commentId: string) {
+    startTransition(async () => {
+      const next = await deleteCommentAction(commentId);
       setData(next);
     });
   }
@@ -879,6 +905,7 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
           onAddComment={(date, text) => {
             handleSaveComment(calendarStudent.id, date, text);
           }}
+          onDeleteComment={handleDeleteComment}
         />
       ) : null}
     </div>

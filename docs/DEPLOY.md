@@ -11,6 +11,14 @@ No usar `drizzle-kit push --force` contra producciÃ³n. Para cambios de esquema
 
 ## Despliegues
 
+### v0.1.6 â€” 2026-11-23
+- **Commit**: `d6a1e39`
+- **Cambios**:
+  - Seguimiento: el micrÃ³fono de dictado rÃ¡pido se cierra automÃ¡ticamente tras ~5s sin voz, manteniendo la opciÃ³n de cierre manual.
+  - Seguimiento: confirmaciÃ³n al eliminar un comentario (nuevo botÃ³n eliminar en comentarios del calendario) y confirmaciÃ³n existente mantenida al eliminar alumno.
+- **BD**: sin cambios de esquema.
+- **VerificaciÃ³n**: `npx tsc --noEmit`, `npm run lint`, deploy Vercel prod.
+
 ### v0.1.5 â€” 2026-11-23
 - **Commit**: `b42448f`
 - **Cambios**:
@@ -50,6 +58,7 @@ No usar `drizzle-kit push --force` contra producciÃ³n. Para cambios de esquema
 
 ### v0.1.0 â€” base
 - MVP inicial Leeduca (4 aÃ±os, ejercicios, seguimiento bÃ¡sico, Turso/Drizzle).
+
 
 
 
