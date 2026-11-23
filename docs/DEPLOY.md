@@ -11,6 +11,14 @@ No usar `drizzle-kit push --force` contra producciÃ³n. Para cambios de esquema
 
 ## Despliegues
 
+### v0.1.23 — 2026-11-23
+- **Commit**: pendiente
+- **Cambios**:
+  - Imágenes más claras y reconocibles en 8 objetos (gato, perro, flor, mariposa, pelota, sol, luna, queso) sustituidas por fotos más obvias.
+  - Créditos actualizados en `docs/IMAGE_CREDITS.md` y `image-catalog.ts`.
+- **BD**: sin cambios de esquema.
+- **Verificación**: imágenes validadas con PIL; `npx tsc --noEmit`, `npm run lint`.
+
 ### v0.1.22 — 2026-11-23
 - **Commit**: `a283234`
 - **Cambios**:

@@ -61,9 +61,9 @@ export const visualCatalog: Record<VisualId, PreleoVisual> = {
     image: "/media/real-objects/gato.jpg",
     category: "animal",
     credit: {
-      author: "Valerius Geng",
+      author: "Desaix83, d'après le travail de Heikki Siltala",
       license: "CC BY 3.0",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:Abyssinian_-_studio_(cropped).jpg",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Angora_Turc_Fond_Blanc.jpg",
     },
   },
   pato: {
@@ -85,9 +85,9 @@ export const visualCatalog: Record<VisualId, PreleoVisual> = {
     image: "/media/real-objects/perro.jpg",
     category: "animal",
     credit: {
-      author: "fro3enfire",
-      license: "CC BY-SA 3.0",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:2_Months_Old_Rottweiler_Puppy.jpg",
+      author: "George Hodan",
+      license: "CC0",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Puppy_Dog_on_White.jpg",
     },
   },
   mesa: {
@@ -109,9 +109,9 @@ export const visualCatalog: Record<VisualId, PreleoVisual> = {
     image: "/media/real-objects/queso.jpg",
     category: "food",
     credit: {
-      author: "Thomas Holbein",
-      license: "CC BY-SA 4.0",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:4_Glask%C3%A4seScheibe.jpg",
+      author: "Paulmcdonald",
+      license: "CC BY-SA 3.0",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Parmesan_Cheese_Wheel_-_Whole_Foods.JPG",
     },
   },
   vaca: {
@@ -146,10 +146,9 @@ export const visualCatalog: Record<VisualId, PreleoVisual> = {
     image: "/media/real-objects/flor.jpg",
     category: "nature",
     credit: {
-      author: "Derek Ramsey (Ram-Man), Chanticleer Garden",
-      license: "CC BY-SA 3.0",
-      sourceUrl:
-        "https://commons.wikimedia.org/wiki/File:Iris_cultivar_(2005-0606-A)_isolated_on_white.jpg",
+      author: "Asmara lesta",
+      license: "CC BY 4.0",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Bunga_Red_Rose.jpg",
     },
   },
   mariposa: {
@@ -159,9 +158,9 @@ export const visualCatalog: Record<VisualId, PreleoVisual> = {
     image: "/media/real-objects/mariposa.jpg",
     category: "animal",
     credit: {
-      author: "Macieklew",
+      author: "ByB",
       license: "CC BY 4.0",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:Butterflies_feeding.jpg",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:PapillonFlambeCevennes.jpg",
     },
   },
   regalo: {
@@ -208,9 +207,9 @@ export const visualCatalog: Record<VisualId, PreleoVisual> = {
     image: "/media/real-objects/luna.jpg",
     category: "nature",
     credit: {
-      author: "PataDePerra",
-      license: "CC BY 4.0",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:La_luna_vista_desde_CDMX.jpg",
+      author: "KaanaveniSaikiran",
+      license: "CC0",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Moon_in_night_with_blackground.jpg",
     },
   },
   pelota: {
@@ -220,9 +219,9 @@ export const visualCatalog: Record<VisualId, PreleoVisual> = {
     image: "/media/real-objects/pelota.jpg",
     category: "object",
     credit: {
-      author: "Evgeny Negin",
-      license: "CC0",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:American_football.jpg",
+      author: "bluesbby from Mountain View, USA",
+      license: "CC BY 2.0",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Just_a_soccer_ball_(34782492153).jpg",
     },
   },
   sol: {
@@ -232,9 +231,9 @@ export const visualCatalog: Record<VisualId, PreleoVisual> = {
     image: "/media/real-objects/sol.jpg",
     category: "nature",
     credit: {
-      author: "Ranjima np",
-      license: "CC0",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:A_sun_set_view.jpg",
+      author: "Moataz EL-Sharaky",
+      license: "CC BY 4.0",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Hands_Holding_the_Sun.jpg",
     },
   },
 };
