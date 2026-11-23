@@ -4,11 +4,9 @@
  * entrada en docs/DEPLOY.md con cambios.
  */
 export const CURRENT_RELEASE = {
-  version: "0.1.1",
+  version: "0.1.2",
   date: "2026-11-23",
   changes: [
-    "Seguimiento: reordenar alumnos arrastrando el icono de agarre (ratón y táctil).",
-    "Seguimiento: editar nombre de alumno con icono de lápiz en la misma tarjeta.",
-    "Persistencia: Turso + Drizzle (misma stack que Sano App); esquema aplicado con migración segura.",
+    "Seguimiento: dictado por voz en comentarios del alumno (botón de micrófono, Web Speech API).",
   ],
 } as const;

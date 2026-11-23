@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition, type PointerEvent } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, useTransition, type PointerEvent } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
 import type { SeguimientoData, Student } from "./types";
@@ -123,6 +123,112 @@ function Modal({ title, onClose, children, wide }: ModalProps) {
   );
 }
 
+type SpeechRecognitionLike = {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>>; resultIndex: number }) => void) | null;
+  onerror: ((event: { error: string }) => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+};
+
+function getSpeechRecognition(): (new () => SpeechRecognitionLike) | null {
+  if (typeof window === "undefined") return null;
+  const w = window as unknown as {
+    SpeechRecognition?: new () => SpeechRecognitionLike;
+    webkitSpeechRecognition?: new () => SpeechRecognitionLike;
+  };
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+}
+
+function VoiceDictationButton({
+  onTranscript,
+  className,
+}: {
+  onTranscript: (text: string) => void;
+  className?: string;
+}) {
+  const supported = useSyncExternalStore(
+    () => () => {},
+    () => getSpeechRecognition() !== null,
+    () => false,
+  );
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+
+  useEffect(() => {
+    return () => {
+      recognitionRef.current?.stop();
+    };
+  }, []);
+
+  function toggle() {
+    const Ctor = getSpeechRecognition();
+    if (!Ctor) return;
+    if (listening) {
+      recognitionRef.current?.stop();
+      setListening(false);
+      return;
+    }
+    const rec = new Ctor();
+    rec.continuous = true;
+    rec.interimResults = false;
+    rec.lang = "es-ES";
+    rec.onresult = (event) => {
+      let chunk = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i]?.[0]?.transcript;
+        if (transcript) chunk += transcript;
+      }
+      const trimmed = chunk.trim();
+      if (trimmed) onTranscript(trimmed);
+    };
+    rec.onerror = () => {
+      setListening(false);
+      recognitionRef.current = null;
+    };
+    rec.onend = () => {
+      setListening(false);
+      recognitionRef.current = null;
+    };
+    recognitionRef.current = rec;
+    try {
+      rec.start();
+      setListening(true);
+    } catch {
+      setListening(false);
+      recognitionRef.current = null;
+    }
+  }
+
+  if (!supported) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      title={listening ? "Detener dictado por voz" : "Dictar comentario por voz"}
+      aria-label={listening ? "Detener dictado por voz" : "Dictar comentario por voz"}
+      aria-pressed={listening}
+      className={cn(
+        "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border transition-colors",
+        listening
+          ? "border-red-400 bg-red-50 text-red-600 hover:bg-red-100"
+          : "border-border/70 text-muted hover:bg-surface-sunken hover:text-foreground",
+        className,
+      )}
+    >
+      <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+        <path d="M7 4a3 3 0 0 1 6 0v6a3 3 0 1 1-6 0V4Z" />
+        <path d="M5.5 9.643a.75.75 0 0 0-1.5 0V10c0 3.06 2.29 5.585 5.25 5.954V17.5h-1.5a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-1.5v-1.546A6.001 6.001 0 0 0 16 10v-.357a.75.75 0 0 0-1.5 0V10a4.5 4.5 0 0 1-9 0v-.357Z" />
+      </svg>
+      {listening ? <span className="sr-only">Escuchando</span> : null}
+    </button>
+  );
+}
+
 type AddCommentModalProps = {
   student: Student;
   initialDate: string;
@@ -138,18 +244,29 @@ function AddCommentModal({ student, initialDate, onClose, onSave }: AddCommentMo
         <p className="text-sm text-muted">
           Fecha del comentario: <span className="font-medium text-foreground">{formatLongDate(initialDate)}</span>
         </p>
-        <label className="flex flex-col gap-1.5">
-          <span className="text-sm font-medium">Comentario</span>
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between gap-2">
+            <label htmlFor="seguimiento-comment-text" className="text-sm font-medium">Comentario</label>
+            <VoiceDictationButton
+              onTranscript={(t) =>
+                setText((prev) => {
+                  const sep = prev && !/\s$/.test(prev) ? " " : "";
+                  return (prev + sep + t).slice(0, 1000);
+                })
+              }
+            />
+          </div>
           <textarea
+            id="seguimiento-comment-text"
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={4}
             maxLength={1000}
-            placeholder="Escribe una observación sobre el alumno..."
+            placeholder="Escribe o dicta una observación sobre el alumno..."
             className="w-full rounded-xl border border-border bg-surface-sunken/30 px-3 py-2.5 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
             autoFocus
           />
-        </label>
+        </div>
         <div className="flex flex-wrap justify-end gap-3">
           <button
             type="button"
@@ -355,17 +472,28 @@ function CalendarModal({ student, data, onClose, onAddComment }: CalendarModalPr
             )}
 
             <div className="border-t border-border/60 pt-3">
-              <label className="flex flex-col gap-1.5">
-                <span className="text-sm font-medium">Añadir comentario en este día</span>
+              <div className="flex flex-col gap-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <label htmlFor="seguimiento-day-comment-text" className="text-sm font-medium">Añadir comentario en este día</label>
+                  <VoiceDictationButton
+                    onTranscript={(t) =>
+                      setDraft((prev) => {
+                        const sep = prev && !/\s$/.test(prev) ? " " : "";
+                        return (prev + sep + t).slice(0, 1000);
+                      })
+                    }
+                  />
+                </div>
                 <textarea
+                  id="seguimiento-day-comment-text"
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
                   rows={3}
                   maxLength={1000}
-                  placeholder="Escribe un comentario para este día..."
+                  placeholder="Escribe o dicta un comentario para este día..."
                   className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
                 />
-              </label>
+              </div>
               <div className="mt-3 flex justify-end">
                 <button
                   type="button"
