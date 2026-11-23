@@ -11,6 +11,14 @@ No usar `drizzle-kit push --force` contra producciÃ³n. Para cambios de esquema
 
 ## Despliegues
 
+### v0.1.8 â€” 2026-11-23
+- **Commit**: `e42db47`
+- **Cambios**:
+  - Seguimiento: reconocimiento por voz migrado a Groq Whisper (`whisper-large-v3-turbo` por defecto). Se graba audio con `MediaRecorder`, se transcribe en server action con `GROQ_API_KEY`, y se aplica en dictado rÃ¡pido de cabecera y botones de dictado en comentarios.
+- **BD**: sin cambios de esquema.
+- **Env**: requiere `GROQ_API_KEY` (ya configurada en Vercel).
+- **VerificaciÃ³n**: `npx tsc --noEmit`, `npm run lint`, deploy Vercel prod.
+
 ### v0.1.7 â€” 2026-11-23
 - **Commit**: `d1eefde`
 - **Cambios**:
@@ -65,6 +73,7 @@ No usar `drizzle-kit push --force` contra producciÃ³n. Para cambios de esquema
 
 ### v0.1.0 â€” base
 - MVP inicial Leeduca (4 aÃ±os, ejercicios, seguimiento bÃ¡sico, Turso/Drizzle).
+
 
 
 

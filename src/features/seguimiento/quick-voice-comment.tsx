@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createCommentAction } from "./actions";
+import { transcribeAudioAction } from "./transcribe-action";
 import type { Student } from "./types";
 
 function pad(n: number) {
@@ -11,26 +12,6 @@ function pad(n: number) {
 
 function toDateKey(d: Date): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
-
-type SpeechRecognitionLike = {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>>; resultIndex: number }) => void) | null;
-  onerror: ((event: { error: string }) => void) | null;
-  onend: (() => void) | null;
-  start: () => void;
-  stop: () => void;
-};
-
-function getSpeechRecognition(): (new () => SpeechRecognitionLike) | null {
-  if (typeof window === "undefined") return null;
-  const w = window as unknown as {
-    SpeechRecognition?: new () => SpeechRecognitionLike;
-    webkitSpeechRecognition?: new () => SpeechRecognitionLike;
-  };
-  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
 }
 
 function normalize(s: string) {
@@ -108,98 +89,118 @@ function extractComment(transcript: string, student: Student): string {
   return fallback || transcript.trim();
 }
 
+function canRecordAudio() {
+  return typeof window !== "undefined" && !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== "undefined";
+}
+
+function pickMimeType() {
+  if (typeof MediaRecorder === "undefined") return "";
+  const candidates = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"];
+  for (const c of candidates) {
+    if (MediaRecorder.isTypeSupported(c)) return c;
+  }
+  return "";
+}
+
 export function QuickVoiceComment({ students }: { students: Student[] }) {
-  const supported = useSyncExternalStore(
-    () => () => {},
-    () => getSpeechRecognition() !== null,
-    () => false,
-  );
   const router = useRouter();
-  const [listening, setListening] = useState(false);
+  const [supported, setSupported] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [pending, setPending] = useState<{ text: string; student: Student | null } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const recRef = useRef<SpeechRecognitionLike | null>(null);
-  const transcriptRef = useRef("");
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only capability detection
+    setSupported(canRecordAudio());
     return () => {
-      recRef.current?.stop();
+      mediaRecorderRef.current?.stop();
+      streamRef.current?.getTracks().forEach((t) => t.stop());
     };
   }, []);
 
-  function stopAndProcess() {
-    recRef.current?.stop();
-    recRef.current = null;
-    setListening(false);
-    const text = transcriptRef.current.trim();
-    transcriptRef.current = "";
+  async function startRecording() {
+    setError(null);
+    setPending(null);
     setTranscript("");
-    if (!text) return;
-    const student = detectStudent(text, students);
-    if (student) {
-      save(student.id, extractComment(text, student));
-    } else {
-      setPending({ text, student: null });
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mimeType = pickMimeType();
+      const rec = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      chunksRef.current = [];
+      rec.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) chunksRef.current.push(e.data);
+      };
+      rec.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+        mediaRecorderRef.current = null;
+        setRecording(false);
+        const blob = new Blob(chunksRef.current, { type: rec.mimeType || "audio/webm" });
+        chunksRef.current = [];
+        if (blob.size < 1024) {
+          setError("No se detectó audio. Inténtalo de nuevo.");
+          return;
+        }
+        await transcribeBlob(blob);
+      };
+      mediaRecorderRef.current = rec;
+      rec.start();
+      setRecording(true);
+    } catch {
+      setError("No se pudo acceder al micrófono. Comprueba los permisos del navegador.");
+      setRecording(false);
     }
   }
 
-  function start() {
-    const Ctor = getSpeechRecognition();
-    if (!Ctor) return;
+  async function transcribeBlob(blob: Blob) {
+    setTranscribing(true);
     setError(null);
-    setPending(null);
-    transcriptRef.current = "";
-    setTranscript("");
-    const rec = new Ctor();
-    rec.continuous = true;
-    rec.interimResults = true;
-    rec.lang = "es-ES";
-    rec.onresult = (event) => {
-      let full = "";
-      for (let i = 0; i < event.results.length; i++) {
-        const t = event.results[i]?.[0]?.transcript;
-        if (t) full += t;
-      }
-      transcriptRef.current = full;
-      setTranscript(full);
-    };
-    rec.onerror = (e) => {
-      setListening(false);
-      recRef.current = null;
-      if (e.error !== "no-speech" && e.error !== "aborted") {
-        setError("No se pudo usar el micrófono. Comprueba los permisos del navegador.");
-      }
-    };
-    rec.onend = () => {
-      // if ended naturally while we think we're listening, process
-      if (recRef.current === rec) {
-        recRef.current = null;
-        setListening(false);
-        const text = transcriptRef.current.trim();
-        transcriptRef.current = "";
-        setTranscript("");
-        if (text) {
-          const student = detectStudent(text, students);
-          if (student) save(student.id, extractComment(text, student));
-          else setPending({ text, student: null });
-        }
-      }
-    };
-    recRef.current = rec;
     try {
-      rec.start();
-      setListening(true);
-    } catch {
-      setError("No se pudo iniciar el dictado por voz.");
-      recRef.current = null;
+      const ext = blob.type.includes("mp4") ? "mp4" : blob.type.includes("ogg") ? "ogg" : "webm";
+      const file = new File([blob], `comentario.${ext}`, { type: blob.type || "audio/webm" });
+      const fd = new FormData();
+      fd.append("audio", file);
+      const result = await transcribeAudioAction(fd);
+      if ("error" in result) {
+        if (result.error === "AI_NOT_CONFIGURED") {
+          setError("Transcripción no configurada (falta GROQ_API_KEY en el servidor).");
+        } else if (result.error === "EMPTY_TRANSCRIPT") {
+          setError("No se entendió el audio. Inténtalo de nuevo.");
+        } else {
+          setError("No se pudo transcribir el audio. Inténtalo de nuevo.");
+        }
+        return;
+      }
+      const text = result.text.trim();
+      setTranscript(text);
+      if (!text) return;
+      const student = detectStudent(text, students);
+      if (student) {
+        save(student.id, extractComment(text, student));
+      } else {
+        setPending({ text, student: null });
+      }
+    } finally {
+      setTranscribing(false);
     }
+  }
+
+  function stopRecording() {
+    const rec = mediaRecorderRef.current;
+    if (rec && rec.state !== "inactive") rec.stop();
   }
 
   function toggle() {
-    if (listening) stopAndProcess();
-    else start();
+    if (transcribing || isPending) return;
+    if (recording) stopRecording();
+    else void startRecording();
   }
 
   function save(studentId: string, text: string) {
@@ -209,6 +210,7 @@ export function QuickVoiceComment({ students }: { students: Student[] }) {
         await createCommentAction({ studentId, date, text });
         setPending(null);
         setError(null);
+        setTranscript("");
         router.refresh();
       } catch {
         setError("No se pudo guardar el comentario.");
@@ -218,22 +220,24 @@ export function QuickVoiceComment({ students }: { students: Student[] }) {
 
   if (!supported) return null;
 
+  const busy = transcribing || isPending;
+
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           onClick={toggle}
-          disabled={isPending || students.length === 0}
-          aria-label={listening ? "Detener dictado" : "Añadir comentario por voz"}
-          aria-pressed={listening}
-          title={listening ? "Detener dictado" : "Añadir comentario por voz"}
+          disabled={busy || students.length === 0}
+          aria-label={recording ? "Detener grabación" : "Añadir comentario por voz"}
+          aria-pressed={recording}
+          title={recording ? "Detener grabación" : "Añadir comentario por voz"}
           className={[
             "inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors",
-            listening
+            recording
               ? "border-red-400 bg-red-50 text-red-600 hover:bg-red-100"
               : "border-accent/30 bg-accent-soft text-accent hover:bg-accent/15",
-            isPending || students.length === 0 ? "opacity-50 cursor-not-allowed" : "",
+            busy || students.length === 0 ? "opacity-50 cursor-not-allowed" : "",
           ].join(" ")}
         >
           <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5" aria-hidden="true">
@@ -242,13 +246,15 @@ export function QuickVoiceComment({ students }: { students: Student[] }) {
           </svg>
         </button>
         <p className="text-sm text-muted">
-          {listening
-            ? "Escuchando... di el comentario y el nombre del alumno. Pulsa para terminar."
-            : "Pulsa el micrófono para dictar un comentario y asignarlo a un alumno hoy."}
+          {recording
+            ? "Grabando... di el comentario y el nombre del alumno. Pulsa para terminar."
+            : transcribing
+              ? "Transcribiendo audio con Groq..."
+              : "Pulsa el micrófono para dictar un comentario y asignarlo a un alumno hoy."}
         </p>
       </div>
 
-      {listening && transcript ? (
+      {transcript && !pending ? (
         <p className="rounded-xl border border-border/60 bg-surface-sunken/30 px-3 py-2 text-sm text-muted">
           <span className="font-medium text-foreground">Transcripción: </span>{transcript}
         </p>

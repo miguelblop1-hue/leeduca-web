@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore, useTransition, type PointerEvent } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition, type PointerEvent } from "react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
 import type { SeguimientoData, Student } from "./types";
@@ -12,6 +12,7 @@ import {
   renameStudentAction,
   reorderStudentsAction,
 } from "./actions";
+import { transcribeAudioAction } from "./transcribe-action";
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -124,24 +125,17 @@ function Modal({ title, onClose, children, wide }: ModalProps) {
   );
 }
 
-type SpeechRecognitionLike = {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>>; resultIndex: number }) => void) | null;
-  onerror: ((event: { error: string }) => void) | null;
-  onend: (() => void) | null;
-  start: () => void;
-  stop: () => void;
-};
+function canRecordAudio() {
+  return typeof window !== "undefined" && !!navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== "undefined";
+}
 
-function getSpeechRecognition(): (new () => SpeechRecognitionLike) | null {
-  if (typeof window === "undefined") return null;
-  const w = window as unknown as {
-    SpeechRecognition?: new () => SpeechRecognitionLike;
-    webkitSpeechRecognition?: new () => SpeechRecognitionLike;
-  };
-  return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null;
+function pickMimeType() {
+  if (typeof MediaRecorder === "undefined") return "";
+  const candidates = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"];
+  for (const c of candidates) {
+    if (MediaRecorder.isTypeSupported(c)) return c;
+  }
+  return "";
 }
 
 function VoiceDictationButton({
@@ -151,81 +145,107 @@ function VoiceDictationButton({
   onTranscript: (text: string) => void;
   className?: string;
 }) {
-  const supported = useSyncExternalStore(
-    () => () => {},
-    () => getSpeechRecognition() !== null,
-    () => false,
-  );
-  const [listening, setListening] = useState(false);
-  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const [supported, setSupported] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- client-only capability detection
+    setSupported(canRecordAudio());
     return () => {
-      recognitionRef.current?.stop();
+      mediaRecorderRef.current?.stop();
+      streamRef.current?.getTracks().forEach((t) => t.stop());
     };
   }, []);
 
-  function toggle() {
-    const Ctor = getSpeechRecognition();
-    if (!Ctor) return;
-    if (listening) {
-      recognitionRef.current?.stop();
-      setListening(false);
-      return;
-    }
-    const rec = new Ctor();
-    rec.continuous = true;
-    rec.interimResults = false;
-    rec.lang = "es-ES";
-    rec.onresult = (event) => {
-      let chunk = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i]?.[0]?.transcript;
-        if (transcript) chunk += transcript;
-      }
-      const trimmed = chunk.trim();
-      if (trimmed) onTranscript(trimmed);
-    };
-    rec.onerror = () => {
-      setListening(false);
-      recognitionRef.current = null;
-    };
-    rec.onend = () => {
-      setListening(false);
-      recognitionRef.current = null;
-    };
-    recognitionRef.current = rec;
+  async function transcribeBlob(blob: Blob) {
+    setTranscribing(true);
     try {
-      rec.start();
-      setListening(true);
-    } catch {
-      setListening(false);
-      recognitionRef.current = null;
+      const ext = blob.type.includes("mp4") ? "mp4" : blob.type.includes("ogg") ? "ogg" : "webm";
+      const file = new File([blob], `comentario.${ext}`, { type: blob.type || "audio/webm" });
+      const fd = new FormData();
+      fd.append("audio", file);
+      const result = await transcribeAudioAction(fd);
+      if ("text" in result && result.text.trim()) onTranscript(result.text.trim());
+    } finally {
+      setTranscribing(false);
     }
   }
 
+  function stopRecording() {
+    const rec = mediaRecorderRef.current;
+    if (rec && rec.state !== "inactive") rec.stop();
+  }
+
+  async function startRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
+      const mimeType = pickMimeType();
+      const rec = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      chunksRef.current = [];
+      rec.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) chunksRef.current.push(e.data);
+      };
+      rec.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+        mediaRecorderRef.current = null;
+        setRecording(false);
+        const blob = new Blob(chunksRef.current, { type: rec.mimeType || "audio/webm" });
+        chunksRef.current = [];
+        if (blob.size >= 1024) await transcribeBlob(blob);
+      };
+      mediaRecorderRef.current = rec;
+      rec.start();
+      setRecording(true);
+    } catch {
+      setRecording(false);
+    }
+  }
+
+  function toggle() {
+    if (transcribing) return;
+    if (recording) stopRecording();
+    else void startRecording();
+  }
+
   if (!supported) return null;
+
+  const busy = recording || transcribing;
+  const label = recording ? "Detener grabación" : transcribing ? "Transcribiendo..." : "Dictar comentario por voz";
 
   return (
     <button
       type="button"
       onClick={toggle}
-      title={listening ? "Detener dictado por voz" : "Dictar comentario por voz"}
-      aria-label={listening ? "Detener dictado por voz" : "Dictar comentario por voz"}
-      aria-pressed={listening}
+      disabled={transcribing}
+      title={label}
+      aria-label={label}
+      aria-pressed={recording}
       className={cn(
         "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border transition-colors",
-        listening
+        recording
           ? "border-red-400 bg-red-50 text-red-600 hover:bg-red-100"
           : "border-border/70 text-muted hover:bg-surface-sunken hover:text-foreground",
+        transcribing && "opacity-60",
         className,
       )}
     >
-      <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
-        <path d="M7 4a3 3 0 0 1 6 0v6a3 3 0 1 1-6 0V4Z" />
-        <path d="M5.5 9.643a.75.75 0 0 0-1.5 0V10c0 3.06 2.29 5.585 5.25 5.954V17.5h-1.5a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-1.5v-1.546A6.001 6.001 0 0 0 16 10v-.357a.75.75 0 0 0-1.5 0V10a4.5 4.5 0 0 1-9 0v-.357Z" />
-      </svg>
-      {listening ? <span className="sr-only">Escuchando</span> : null}
+      {transcribing ? (
+        <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 animate-spin" aria-hidden="true">
+          <path fillRule="evenodd" d="M15.312 11.424a5.5 5.5 0 0 1-9.201 2.466l-.312-.311h2.433a.75.75 0 0 0 0-1.5H4.598a.75.75 0 0 0-.75.75v3.634a.75.75 0 0 0 1.5 0v-2.033l.312.312a7 7 0 0 0 11.712-3.138.75.75 0 0 0-1.449-.39Zm-10.624-2.85a5.5 5.5 0 0 1 9.201-2.465l.312.31H11.77a.75.75 0 0 0 0 1.5h3.634a.75.75 0 0 0 .75-.75V3.535a.75.75 0 0 0-1.5 0v2.033l-.312-.312a7 7 0 0 0-11.712 3.138.75.75 0 0 0 1.449.39Z" clipRule="evenodd" />
+        </svg>
+      ) : (
+        <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+          <path d="M7 4a3 3 0 0 1 6 0v6a3 3 0 1 1-6 0V4Z" />
+          <path d="M5.5 9.643a.75.75 0 0 0-1.5 0V10c0 3.06 2.29 5.585 5.25 5.954V17.5h-1.5a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-1.5v-1.546A6.001 6.001 0 0 0 16 10v-.357a.75.75 0 0 0-1.5 0V10a4.5 4.5 0 0 1-9 0v-.357Z" />
+        </svg>
+      )}
+      {busy ? <span className="sr-only">{label}</span> : null}
     </button>
   );
 }

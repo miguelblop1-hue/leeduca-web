@@ -4,9 +4,9 @@
  * entrada en docs/DEPLOY.md con cambios.
  */
 export const CURRENT_RELEASE = {
-  version: "0.1.7",
+  version: "0.1.8",
   date: "2026-11-23",
   changes: [
-    "Seguimiento: eliminado el cierre automático por silencio del micrófono de dictado rápido; el cierre pasa a ser solo manual.",
+    "Seguimiento: reconocimiento por voz mejorado con Groq Whisper (grabación MediaRecorder + transcripción en servidor) en dictado rápido y comentarios.",
   ],
 } as const;
