@@ -4,9 +4,9 @@
  * entrada en docs/DEPLOY.md con cambios.
  */
 export const CURRENT_RELEASE = {
-  version: "0.1.13",
+  version: "0.1.14",
   date: "2026-11-23",
   changes: [
-    "Seguimiento: el tile del alumno muestra el número de comentarios de hoy entre paréntesis, p. ej. (2).",
+    "Seguimiento: informes semanal y mensual con selección de periodo, menciones por alumno y descarga del documento.",
   ],
 } as const;

@@ -11,6 +11,13 @@ No usar `drizzle-kit push --force` contra producciÃ³n. Para cambios de esquema
 
 ## Despliegues
 
+### v0.1.14 â€” 2026-11-23
+- **Commit**: `d3776cf`
+- **Cambios**:
+  - Seguimiento del alumnado: botones "Informe semanal" e "Informe mensual" sobre el bloque de aÃ±adir alumnos. Permiten seleccionar semana/mes, ver menciones por alumno y comentarios por dÃ­a, y descargar el informe en .txt.
+- **BD**: sin cambios de esquema.
+- **VerificaciÃ³n**: `npx tsc --noEmit`, `npm run lint`, deploy Vercel prod.
+
 ### v0.1.13 â€” 2026-11-23
 - **Commit**: `8df62a7`
 - **Cambios**:
@@ -109,6 +116,7 @@ No usar `drizzle-kit push --force` contra producciÃ³n. Para cambios de esquema
 
 ### v0.1.0 â€” base
 - MVP inicial Leeduca (4 aÃ±os, ejercicios, seguimiento bÃ¡sico, Turso/Drizzle).
+
 
 
 

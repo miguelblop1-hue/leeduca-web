@@ -636,6 +636,163 @@ function commentsForStudentOnDateLocal(
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
 }
 
+function startOfMonth(d: Date) {
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+
+function addMonths(d: Date, months: number) {
+  return new Date(d.getFullYear(), d.getMonth() + months, 1);
+}
+
+function endOfMonth(d: Date) {
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0);
+}
+
+function formatMonthYear(d: Date) {
+  return d.toLocaleDateString("es-ES", { month: "long", year: "numeric" });
+}
+
+type ReportModalProps = {
+  mode: "weekly" | "monthly";
+  data: SeguimientoData;
+  onClose: () => void;
+};
+
+function ReportModal({ mode, data, onClose }: ReportModalProps) {
+  const today = useMemo(() => new Date(), []);
+  const todayKey = toDateKey(today);
+  const [weekStart, setWeekStart] = useState(() => startOfWeekMonday(today));
+  const [monthStart, setMonthStart] = useState(() => startOfMonth(today));
+
+  const minWeek = useMemo(() => startOfWeekMonday(courseStartFor(today)), [today]);
+  const currentWeek = useMemo(() => startOfWeekMonday(today), [today]);
+  const minMonth = useMemo(() => startOfMonth(courseStartFor(today)), [today]);
+  const currentMonth = useMemo(() => startOfMonth(today), [today]);
+
+  const period = useMemo(() => {
+    if (mode === "weekly") {
+      const start = weekStart;
+      const end = addDays(weekStart, 4); // Mon-Fri
+      return { start, end, label: `${formatLongDate(toDateKey(start))} - ${formatLongDate(toDateKey(end))}` };
+    }
+    const start = monthStart;
+    const end = endOfMonth(monthStart);
+    const cappedEnd = toDateKey(end) > todayKey ? today : end;
+    return { start, end: cappedEnd, label: formatMonthYear(monthStart) };
+  }, [mode, weekStart, monthStart, today, todayKey]);
+
+  const reportRows = useMemo(() => {
+    const startKey = toDateKey(period.start);
+    const endKey = toDateKey(period.end);
+    return data.students.map((student) => {
+      const comments = data.comments
+        .filter((c) => c.studentId === student.id && c.date >= startKey && c.date <= endKey)
+        .sort((a, b) => (a.date === b.date ? a.createdAt.localeCompare(b.createdAt) : a.date.localeCompare(b.date)));
+      return { student, comments };
+    });
+  }, [data, period]);
+
+  const totalMentions = reportRows.reduce((acc, r) => acc + r.comments.length, 0);
+
+  function buildReportText() {
+    const lines: string[] = [];
+    lines.push(mode === "weekly" ? "INFORME SEMANAL" : "INFORME MENSUAL");
+    lines.push(period.label);
+    lines.push(`Generado: ${formatLongDate(todayKey)}`);
+    lines.push("");
+    lines.push(`Total menciones/comentarios: ${totalMentions}`);
+    lines.push("");
+    for (const row of reportRows) {
+      lines.push(`=== ${row.student.name.toUpperCase()} ===`);
+      lines.push(`Menciones: ${row.comments.length}`);
+      if (row.comments.length === 0) {
+        lines.push("Sin comentarios en el periodo.");
+      } else {
+        for (const c of row.comments) {
+          lines.push(`- [${formatLongDate(c.date)}] ${c.text}`);
+        }
+      }
+      lines.push("");
+    }
+    return lines.join("\n");
+  }
+
+  function downloadReport() {
+    const text = buildReportText();
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const safePeriod = period.label.toLowerCase().replace(/[^a-z0-9áéíóúñü]+/gi, "-").replace(/^-+|-+$/g, "");
+    a.href = url;
+    a.download = `${mode === "weekly" ? "informe-semanal" : "informe-mensual"}-${safePeriod}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  const canPrev = mode === "weekly" ? weekStart.getTime() > minWeek.getTime() : monthStart.getTime() > minMonth.getTime();
+  const canNext = mode === "weekly" ? weekStart.getTime() < currentWeek.getTime() : monthStart.getTime() < currentMonth.getTime();
+
+  function goPrev() {
+    if (!canPrev) return;
+    if (mode === "weekly") setWeekStart((w) => addDays(w, -7));
+    else setMonthStart((m) => addMonths(m, -1));
+  }
+  function goNext() {
+    if (!canNext) return;
+    if (mode === "weekly") setWeekStart((w) => addDays(w, 7));
+    else setMonthStart((m) => addMonths(m, 1));
+  }
+
+  return (
+    <Modal
+      title={mode === "weekly" ? "Informe semanal" : "Informe mensual"}
+      onClose={onClose}
+      wide
+    >
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm text-muted">Periodo seleccionado</p>
+            <p className="font-medium capitalize">{period.label}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={goPrev} disabled={!canPrev} className={cn("rounded-lg border px-3 py-1.5 text-sm", canPrev ? "border-border/70 hover:bg-surface-sunken" : "cursor-not-allowed border-border/40 text-muted/50")}>Anterior</button>
+            <button type="button" onClick={goNext} disabled={!canNext} className={cn("rounded-lg border px-3 py-1.5 text-sm", canNext ? "border-border/70 hover:bg-surface-sunken" : "cursor-not-allowed border-border/40 text-muted/50")}>Siguiente</button>
+            <button type="button" onClick={downloadReport} className="rounded-lg bg-accent px-3 py-1.5 text-sm font-medium text-on-accent hover:bg-accent-strong">Descargar</button>
+          </div>
+        </div>
+
+        <p className="text-sm text-muted">Total menciones/comentarios: <span className="font-medium text-foreground">{totalMentions}</span></p>
+
+        <div className="max-h-[60vh] space-y-3 overflow-auto pr-1">
+          {reportRows.map(({ student, comments }) => (
+            <div key={student.id} className="rounded-xl border border-border/60 bg-surface-sunken/20 p-4">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h3 className="font-semibold uppercase tracking-wide">{student.name}</h3>
+                <span className="text-sm text-muted">{comments.length} {comments.length === 1 ? "mención" : "menciones"}</span>
+              </div>
+              {comments.length === 0 ? (
+                <p className="mt-2 text-sm text-muted">Sin comentarios en el periodo.</p>
+              ) : (
+                <ul className="mt-2 space-y-2">
+                  {comments.map((c) => (
+                    <li key={c.id} className="text-sm">
+                      <span className="font-medium text-muted">[{formatLongDate(c.date)}]</span>{" "}
+                      <span className="whitespace-pre-wrap">{c.text}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 export function StudentTracker({ initialData }: { initialData: SeguimientoData }) {
   const [data, setData] = useState<SeguimientoData>(initialData);
   const [newName, setNewName] = useState("");
@@ -646,6 +803,7 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
   }, [initialData]);
   const [commentStudent, setCommentStudent] = useState<Student | null>(null);
   const [calendarStudent, setCalendarStudent] = useState<Student | null>(null);
+  const [reportMode, setReportMode] = useState<"weekly" | "monthly" | null>(null);
   const [, startTransition] = useTransition();
 
   const liveCalendarStudent = calendarStudent
@@ -778,6 +936,23 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
 
   return (
     <div className="space-y-6">
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => setReportMode("weekly")}
+          className="inline-flex items-center gap-2 rounded-xl border border-border/70 bg-surface px-4 py-2.5 text-sm font-medium transition-colors hover:bg-surface-sunken hover:text-accent"
+        >
+          Informe semanal
+        </button>
+        <button
+          type="button"
+          onClick={() => setReportMode("monthly")}
+          className="inline-flex items-center gap-2 rounded-xl border border-border/70 bg-surface px-4 py-2.5 text-sm font-medium transition-colors hover:bg-surface-sunken hover:text-accent"
+        >
+          Informe mensual
+        </button>
+      </div>
+
       <Card className="space-y-4 p-5 sm:p-6">
         <div>
           <h2 className="text-lg font-semibold">Alumnado</h2>
@@ -919,6 +1094,10 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
           onDeleteComment={handleDeleteComment}
           onRename={handleRenameStudent}
         />
+      ) : null}
+
+      {reportMode ? (
+        <ReportModal mode={reportMode} data={data} onClose={() => setReportMode(null)} />
       ) : null}
     </div>
   );
