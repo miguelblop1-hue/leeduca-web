@@ -937,6 +937,7 @@ function ReportModal({ mode, data, onClose }: ReportModalProps) {
 export function StudentTracker({ initialData }: { initialData: SeguimientoData }) {
   const [data, setData] = useState<SeguimientoData>(initialData);
   const [newName, setNewName] = useState("");
+  const [addingStudent, setAddingStudent] = useState(false);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- sync server-refreshed data
@@ -957,6 +958,7 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
     const name = newName.trim();
     if (!name) return;
     setNewName("");
+    setAddingStudent(false);
     startTransition(async () => {
       const next = await createStudentAction(name);
       setData(next);
@@ -1083,79 +1085,11 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
   }
 
   return (
-    <div className="space-y-6">
-      <Card className="space-y-4 p-5 sm:p-6">
-        <div>
-          <h2 className="text-lg font-semibold">Informe</h2>
-          <p className="mt-1 text-sm text-muted">
-            Descarga informes semanales o mensuales con la relación de comentarios de todos los alumnos seleccionados en el periodo.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => setReportMode("weekly")}
-            className="inline-flex items-center gap-2 rounded-xl border border-border/70 bg-surface px-4 py-2.5 text-sm font-medium transition-colors hover:bg-surface-sunken hover:text-accent"
-          >
-            Informe semanal
-          </button>
-          <button
-            type="button"
-            onClick={() => setReportMode("monthly")}
-            className="inline-flex items-center gap-2 rounded-xl border border-border/70 bg-surface px-4 py-2.5 text-sm font-medium transition-colors hover:bg-surface-sunken hover:text-accent"
-          >
-            Informe mensual
-          </button>
-        </div>
-      </Card>
-
-      <Card className="space-y-4 p-5 sm:p-6">
-        <div>
-          <h2 className="text-lg font-semibold">Alumnado</h2>
-          <p className="text-sm text-muted">
-            Añade alumnos y registra comentarios con fecha. Los datos se guardan en este navegador (localStorage).
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <label className="flex-1">
-            <span className="sr-only">Nombre del alumno</span>
-            <input
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleAddStudent();
-                }
-              }}
-              placeholder="Nombre del alumno"
-              maxLength={80}
-              className="w-full rounded-xl border border-border bg-surface-sunken/30 px-3 py-2.5 text-sm outline-none transition focus:border-accent focus:ring-2 focus:ring-accent/20"
-            />
-          </label>
-          <button
-            type="button"
-            onClick={handleAddStudent}
-            disabled={!newName.trim()}
-            className={cn(
-              "rounded-xl px-4 py-2.5 text-sm font-medium transition-colors sm:shrink-0",
-              newName.trim()
-                ? "bg-accent text-on-accent hover:bg-accent-strong"
-                : "cursor-not-allowed bg-accent/40 text-on-accent/70",
-            )}
-          >
-            Añadir alumno
-          </button>
-        </div>
-      </Card>
-
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-        {data.students.length === 0 ? (
-          <Card className="p-5 text-sm text-muted">No hay alumnos todavía. Añade el primero arriba.</Card>
-        ) : (
-          data.students.map((student) => {
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted">Alumnos ({data.students.length})</p>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+          {data.students.map((student) => {
             const isDragging = dragId === student.id;
             const isDragOver = dragOverId === student.id && dragId !== student.id;
             const todayCount = data.comments.filter((c) => c.studentId === student.id && c.date === todayKey).length;
@@ -1223,8 +1157,74 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
                 </button>
               </Card>
             );
-          })
-        )}
+          })}
+
+          {addingStudent ? (
+            <Card className="flex items-center gap-1.5 px-2 py-1.5">
+              <input
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddStudent();
+                  }
+                  if (e.key === "Escape") {
+                    setNewName("");
+                    setAddingStudent(false);
+                  }
+                }}
+                placeholder="Nombre"
+                maxLength={80}
+                autoFocus
+                className="min-w-0 w-full rounded-md border border-border bg-surface-sunken/30 px-2 py-1 text-xs outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+              />
+              <button
+                type="button"
+                onClick={handleAddStudent}
+                disabled={!newName.trim()}
+                className={cn(
+                  "shrink-0 rounded-md px-2 py-1 text-xs font-medium",
+                  newName.trim() ? "bg-accent text-on-accent hover:bg-accent-strong" : "cursor-not-allowed bg-accent/40 text-on-accent/70",
+                )}
+              >
+                OK
+              </button>
+            </Card>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setAddingStudent(true)}
+              className="flex min-h-[44px] items-center justify-center gap-1.5 rounded-2xl border border-dashed border-border/80 bg-surface/50 px-2 py-1.5 text-xs font-medium text-muted transition-colors hover:border-accent/40 hover:bg-surface-sunken hover:text-accent"
+            >
+              <span className="text-base leading-none">+</span> Añadir alumno
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border/60 bg-surface/60 px-4 py-3">
+        <div className="min-w-0">
+          <p className="text-sm font-medium">Informes</p>
+          <p className="text-xs text-muted">Descarga semanal o mensual con comentarios de los alumnos seleccionados.</p>
+        </div>
+        <div className="flex shrink-0 gap-2">
+          <button
+            type="button"
+            onClick={() => setReportMode("weekly")}
+            className="rounded-lg border border-border/70 px-3 py-1.5 text-xs font-medium hover:bg-surface-sunken hover:text-accent"
+          >
+            Semanal
+          </button>
+          <button
+            type="button"
+            onClick={() => setReportMode("monthly")}
+            className="rounded-lg border border-border/70 px-3 py-1.5 text-xs font-medium hover:bg-surface-sunken hover:text-accent"
+          >
+            Mensual
+          </button>
+        </div>
       </div>
 
       {commentStudent ? (

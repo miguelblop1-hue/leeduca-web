@@ -4,10 +4,9 @@
  * entrada en docs/DEPLOY.md con cambios.
  */
 export const CURRENT_RELEASE = {
-  version: "0.1.19",
+  version: "0.1.20",
   date: "2026-11-23",
   changes: [
-    "Seguimiento: cabecera en tarjeta con micrófono y bloque de informes separado.",
-    "Informes: selección de alumnos/comentarios (todos por defecto) para incluir solo lo deseado en la descarga.",
+    "Seguimiento: reorganizado en micrófono, alumnos, añadir alumno compacto en grid e informes compactos al final.",
   ],
 } as const;
