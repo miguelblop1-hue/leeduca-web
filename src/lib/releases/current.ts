@@ -4,9 +4,9 @@
  * entrada en docs/DEPLOY.md con cambios.
  */
 export const CURRENT_RELEASE = {
-  version: "0.1.12",
+  version: "0.1.13",
   date: "2026-11-23",
   changes: [
-    "Interfaz: modo claro fijo; se elimina el selector de modo oscuro.",
+    "Seguimiento: el tile del alumno muestra el número de comentarios de hoy entre paréntesis, p. ej. (2).",
   ],
 } as const;

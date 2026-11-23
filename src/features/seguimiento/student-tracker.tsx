@@ -827,6 +827,7 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
           data.students.map((student) => {
             const isDragging = dragId === student.id;
             const isDragOver = dragOverId === student.id && dragId !== student.id;
+            const todayCount = data.comments.filter((c) => c.studentId === student.id && c.date === todayKey).length;
             return (
               <Card
                 key={student.id}
@@ -870,7 +871,10 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
                   </svg>
                 </button>
 
-                <p className="min-w-0 flex-1 truncate text-[11px] font-semibold uppercase tracking-wide text-foreground">{student.name}</p>
+                <p className="min-w-0 flex-1 truncate text-[11px] font-semibold uppercase tracking-wide text-foreground">
+                  {student.name}
+                  {todayCount > 0 ? <span className="ml-1 text-accent">({todayCount})</span> : null}
+                </p>
 
                 <button
                   type="button"
