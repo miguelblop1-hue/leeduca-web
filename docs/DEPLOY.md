@@ -11,6 +11,13 @@ No usar `drizzle-kit push --force` contra producciÃ³n. Para cambios de esquema
 
 ## Despliegues
 
+### v0.1.5 â€” 2026-11-23
+- **Commit**: `b42448f`
+- **Cambios**:
+  - Seguimiento del alumnado: el dictado rÃ¡pido por voz extrae solo el contenido del comentario, eliminando el nombre del alumno y frases de comando (p. ej. "aÃ±ade a AntÃ­a este comentario hola buenos dÃ­as" guarda "hola buenos dÃ­as").
+- **BD**: sin cambios de esquema.
+- **VerificaciÃ³n**: `npx tsc --noEmit`, `npm run lint`, deploy Vercel prod.
+
 ### v0.1.4 â€” 2026-11-23
 - **Commit**: `804755c`
 - **Cambios**:
@@ -43,6 +50,7 @@ No usar `drizzle-kit push --force` contra producciÃ³n. Para cambios de esquema
 
 ### v0.1.0 â€” base
 - MVP inicial Leeduca (4 aÃ±os, ejercicios, seguimiento bÃ¡sico, Turso/Drizzle).
+
 
 
 

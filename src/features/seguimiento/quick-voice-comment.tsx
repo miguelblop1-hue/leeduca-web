@@ -43,6 +43,27 @@ function normalize(s: string) {
     .trim();
 }
 
+function escapeRegExp(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+const ACCENT_MAP: Record<string, string> = {
+  a: "aáàäâ", e: "eéèëê", i: "iíìïî", o: "oóòöô", u: "uúùüû", n: "nñ",
+  A: "AÁÀÄÂ", E: "EÉÈËÊ", I: "IÍÌÏÎ", O: "OÓÒÖÔ", U: "UÚÙÜÛ", N: "NÑ",
+};
+
+function accentInsensitivePattern(s: string) {
+  return Array.from(s)
+    .map((ch) => {
+      const base = ch.normalize("NFD").replace(/\p{Diacritic}/gu, "");
+      const group = ACCENT_MAP[base] ?? ACCENT_MAP[base.toLowerCase()];
+      if (!group) return escapeRegExp(ch);
+      const chars = group.split("").map(escapeRegExp).join("");
+      return `[${chars}]`;
+    })
+    .join("");
+}
+
 function detectStudent(transcript: string, students: Student[]): Student | null {
   const t = ` ${normalize(transcript)} `;
   const matches = students.filter((s) => {
@@ -53,6 +74,38 @@ function detectStudent(transcript: string, students: Student[]): Student | null 
     return tokens.some((tok) => t.includes(` ${tok} `));
   });
   return matches.length === 1 ? matches[0] : null;
+}
+
+function extractComment(transcript: string, student: Student): string {
+  let t = ` ${transcript.trim()} `;
+
+  // Remove student name (accent-insensitive)
+  const nameParts = student.name.trim().split(/\s+/).filter(Boolean);
+  if (nameParts.length > 0) {
+    const namePattern = nameParts.map(accentInsensitivePattern).join("\\s+");
+    t = t.replace(new RegExp(`\\b${namePattern}\\b`, "giu"), " ");
+  }
+
+  // Remove common voice-command scaffolding
+  t = t.replace(/^\s*(añade|añadir|agrega|agregar|pon|ponle|ponme|asigna|asignar|guarda|guardar|crea|crear|escribe|escribir|registra|registrar|anota|anotar|mete|meter)\s+/iu, " ");
+  t = t.replace(/\b(este|un|el|la)\s+(comentario|nota|observaci[oó]n)\b/giu, " ");
+  t = t.replace(/^\s*(comentario|nota|observaci[oó]n)\s+/iu, " ");
+  t = t.replace(/^\s*(para|a|al|de)\s+/iu, " ");
+  t = t.replace(/^\s*(para|a|al|de)\s+/iu, " ");
+  t = t.replace(/\s+(para|a|al|de)\s*$/iu, " ");
+
+  t = t.replace(/\s+/g, " ").trim();
+  t = t.replace(/^[,.:;¿?¡!\-\s]+|[,.:;¿?¡!\-\s]+$/g, "").trim();
+
+  if (t.length >= 2) return t;
+  // Fallback: remove only the name from original
+  let fallback = ` ${transcript.trim()} `;
+  if (nameParts.length > 0) {
+    const namePattern = nameParts.map(accentInsensitivePattern).join("\\s+");
+    fallback = fallback.replace(new RegExp(`\\b${namePattern}\\b`, "giu"), " ");
+  }
+  fallback = fallback.replace(/\s+/g, " ").trim();
+  return fallback || transcript.trim();
 }
 
 export function QuickVoiceComment({ students }: { students: Student[] }) {
@@ -86,7 +139,7 @@ export function QuickVoiceComment({ students }: { students: Student[] }) {
     if (!text) return;
     const student = detectStudent(text, students);
     if (student) {
-      save(student.id, text);
+      save(student.id, extractComment(text, student));
     } else {
       setPending({ text, student: null });
     }
@@ -129,7 +182,7 @@ export function QuickVoiceComment({ students }: { students: Student[] }) {
         setTranscript("");
         if (text) {
           const student = detectStudent(text, students);
-          if (student) save(student.id, text);
+          if (student) save(student.id, extractComment(text, student));
           else setPending({ text, student: null });
         }
       }
@@ -214,7 +267,7 @@ export function QuickVoiceComment({ students }: { students: Student[] }) {
                 key={s.id}
                 type="button"
                 disabled={isPending}
-                onClick={() => save(s.id, pending.text)}
+                onClick={() => save(s.id, extractComment(pending.text, s))}
                 className="rounded-lg border border-border/70 bg-surface px-3 py-1.5 text-sm font-medium hover:bg-surface-sunken disabled:opacity-50"
               >
                 {s.name}
