@@ -4,10 +4,9 @@
  * entrada en docs/DEPLOY.md con cambios.
  */
 export const CURRENT_RELEASE = {
-  version: "0.1.10",
+  version: "0.1.11",
   date: "2026-11-23",
   changes: [
-    "Seguimiento: card de alumno clicable completo, nombre en mayúsculas y diseño más compacto; edición de nombre movida al modal de agenda.",
-    "Página principal: Seguimiento primero, sin título 'Otros servicios', seguido de MVP y edades disponibles.",
+    "Seguimiento: tarjetas de alumno aún más compactas y X de eliminar centrada verticalmente a la derecha.",
   ],
 } as const;

@@ -820,7 +820,7 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
         </div>
       </Card>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
         {data.students.length === 0 ? (
           <Card className="p-5 text-sm text-muted">No hay alumnos todavía. Añade el primero arriba.</Card>
         ) : (
@@ -844,7 +844,7 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
                   }
                 }}
                 className={cn(
-                  "relative flex cursor-pointer items-center gap-1.5 px-2.5 py-2 pr-8 transition-all hover:border-accent/40 hover:bg-surface-sunken/30",
+                  "relative flex cursor-pointer items-center gap-1 px-2 py-1.5 pr-7 transition-all hover:border-accent/40 hover:bg-surface-sunken/30",
                   isDragging && "opacity-50",
                   isDragOver && "border-accent/60 ring-2 ring-accent/20",
                 )}
@@ -863,14 +863,14 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
                   onPointerCancel={handleDragEnd}
                   aria-label={`Arrastrar para reordenar a ${student.name}`}
                   title="Mantén pulsado y arrastra para reordenar"
-                  className="inline-flex h-7 w-7 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-sunken hover:text-foreground active:cursor-grabbing"
+                  className="inline-flex h-6 w-6 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-sunken hover:text-foreground active:cursor-grabbing"
                 >
-                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true">
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3" aria-hidden="true">
                     <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
                   </svg>
                 </button>
 
-                <p className="min-w-0 flex-1 truncate text-xs font-semibold uppercase tracking-wide text-foreground">{student.name}</p>
+                <p className="min-w-0 flex-1 truncate text-[11px] font-semibold uppercase tracking-wide text-foreground">{student.name}</p>
 
                 <button
                   type="button"
@@ -880,7 +880,7 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
                   }}
                   aria-label={`Eliminar a ${student.name}`}
                   title="Eliminar alumno"
-                  className="absolute right-1 top-1 inline-flex h-5 w-5 items-center justify-center rounded-md text-muted transition-colors hover:bg-danger/10 hover:text-danger"
+                  className="absolute right-1 top-1/2 inline-flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-md text-muted transition-colors hover:bg-danger/10 hover:text-danger"
                 >
                   <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true">
                     <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
