@@ -224,7 +224,7 @@ export function QuickVoiceComment({ students }: { students: Student[] }) {
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-col items-center gap-3 text-center">
         <button
           type="button"
           onClick={toggle}
@@ -233,19 +233,19 @@ export function QuickVoiceComment({ students }: { students: Student[] }) {
           aria-pressed={recording}
           title={recording ? "Detener grabación" : "Añadir comentario por voz"}
           className={[
-            "inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors",
+            "inline-flex h-20 w-20 items-center justify-center rounded-full border transition-colors sm:h-24 sm:w-24",
             recording
               ? "border-red-400 bg-red-50 text-red-600 hover:bg-red-100"
               : "border-accent/30 bg-accent-soft text-accent hover:bg-accent/15",
             busy || students.length === 0 ? "opacity-50 cursor-not-allowed" : "",
           ].join(" ")}
         >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-5 w-5" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="currentColor" className="h-10 w-10 sm:h-12 sm:w-12" aria-hidden="true">
             <path d="M7 4a3 3 0 0 1 6 0v6a3 3 0 1 1-6 0V4Z" />
             <path d="M5.5 9.643a.75.75 0 0 0-1.5 0V10c0 3.06 2.29 5.585 5.25 5.954V17.5h-1.5a.75.75 0 0 0 0 1.5h4.5a.75.75 0 0 0 0-1.5h-1.5v-1.546A6.001 6.001 0 0 0 16 10v-.357a.75.75 0 0 0-1.5 0V10a4.5 4.5 0 0 1-9 0v-.357Z" />
           </svg>
         </button>
-        <p className="text-sm text-muted">
+        <p className="max-w-xl text-sm text-muted">
           {recording
             ? "Grabando... di el comentario y el nombre del alumno. Pulsa para terminar."
             : transcribing

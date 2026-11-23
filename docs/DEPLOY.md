@@ -11,6 +11,13 @@ No usar `drizzle-kit push --force` contra producciÃ³n. Para cambios de esquema
 
 ## Despliegues
 
+### v0.1.17 â€” 2026-11-23
+- **Commit**: `656e251`
+- **Cambios**:
+  - Seguimiento del alumnado: se simplifica la cabecera eliminando el bloque de presentaciÃ³n, dejando el micrÃ³fono mÃ¡s grande y la explicaciÃ³n debajo.
+- **BD**: sin cambios de esquema.
+- **VerificaciÃ³n**: `npx tsc --noEmit`, `npm run lint`, deploy Vercel prod.
+
 ### v0.1.16 â€” 2026-11-23
 - **Commit**: `61e833e`
 - **Cambios**:
@@ -130,6 +137,7 @@ No usar `drizzle-kit push --force` contra producciÃ³n. Para cambios de esquema
 
 ### v0.1.0 â€” base
 - MVP inicial Leeduca (4 aÃ±os, ejercicios, seguimiento bÃ¡sico, Turso/Drizzle).
+
 
 
 
