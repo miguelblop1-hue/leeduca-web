@@ -4,6 +4,7 @@ import { DemoBadge } from "@/components/ui/demo-badge";
 import { Card } from "@/components/ui/card";
 import { StudentTracker } from "@/features/seguimiento/student-tracker";
 import { getSeguimientoData } from "@/features/seguimiento/actions";
+import { QuickVoiceComment } from "@/features/seguimiento/quick-voice-comment";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,9 @@ export default async function SeguimientoPage() {
             Registra comentarios por alumno, consulta la agenda semanal (lunes a viernes) y añade
             observaciones en días anteriores desde el inicio de curso.
           </p>
+          <div className="pt-2">
+            <QuickVoiceComment students={initialData?.students ?? []} />
+          </div>
         </div>
       </section>
 

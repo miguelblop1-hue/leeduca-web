@@ -530,6 +530,11 @@ function commentsForStudentOnDateLocal(
 export function StudentTracker({ initialData }: { initialData: SeguimientoData }) {
   const [data, setData] = useState<SeguimientoData>(initialData);
   const [newName, setNewName] = useState("");
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sync server-refreshed data
+    setData(initialData);
+  }, [initialData]);
   const [commentStudent, setCommentStudent] = useState<Student | null>(null);
   const [calendarStudent, setCalendarStudent] = useState<Student | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
