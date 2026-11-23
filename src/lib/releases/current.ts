@@ -4,9 +4,9 @@
  * entrada en docs/DEPLOY.md con cambios.
  */
 export const CURRENT_RELEASE = {
-  version: "0.1.8",
+  version: "0.1.9",
   date: "2026-11-23",
   changes: [
-    "Seguimiento: reconocimiento por voz mejorado con Groq Whisper (grabación MediaRecorder + transcripción en servidor) en dictado rápido y comentarios.",
+    "Seguimiento: tarjetas de alumno compactas (solo nombre); clic en nombre abre agenda; eliminar con X en esquina y confirmación.",
   ],
 } as const;

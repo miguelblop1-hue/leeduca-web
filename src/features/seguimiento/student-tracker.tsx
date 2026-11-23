@@ -754,12 +754,11 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
         </div>
       </Card>
 
-      <div className="grid gap-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {data.students.length === 0 ? (
           <Card className="p-5 text-sm text-muted">No hay alumnos todavía. Añade el primero arriba.</Card>
         ) : (
           data.students.map((student) => {
-            const commentCount = data.comments.filter((c) => c.studentId === student.id).length;
             const isDragging = dragId === student.id;
             const isDragOver = dragOverId === student.id && dragId !== student.id;
             const isEditing = editingId === student.id;
@@ -771,134 +770,100 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
                   else cardRefs.current.delete(student.id);
                 }}
                 className={cn(
-                  "flex flex-row flex-wrap items-center justify-between gap-3 p-4 transition-all sm:p-5",
+                  "relative flex items-center gap-2 p-3 pr-10 transition-all sm:p-3 sm:pr-10",
                   isDragging && "opacity-50",
                   isDragOver && "border-accent/60 ring-2 ring-accent/20",
                 )}
               >
-                <div className="flex min-w-0 items-center gap-3">
-                  <button
-                    type="button"
-                    onPointerDown={(e) => handlePointerDown(e, student.id)}
-                    onPointerMove={handlePointerMove}
-                    onPointerUp={handlePointerUp}
-                    onPointerCancel={handleDragEnd}
-                    aria-label={`Arrastrar para reordenar a ${student.name}`}
-                    title="Mantén pulsado y arrastra para reordenar"
-                    className="inline-flex h-9 w-9 shrink-0 cursor-grab touch-none items-center justify-center rounded-md border border-border/70 text-muted transition-colors hover:bg-surface-sunken hover:text-foreground active:cursor-grabbing"
-                  >
-                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
-                      <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
-                    </svg>
-                  </button>
-                  <div className="min-w-0 flex-1">
-                    {isEditing ? (
-                      <div className="flex flex-wrap items-center gap-2">
-                        <input
-                          type="text"
-                          value={editingName}
-                          onChange={(e) => setEditingName(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                              handleRenameStudent(student.id);
-                            }
-                            if (e.key === "Escape") {
-                              setEditingId(null);
-                              setEditingName("");
-                            }
-                          }}
-                          maxLength={80}
-                          autoFocus
-                          className="min-w-0 flex-1 rounded-lg border border-border bg-surface-sunken/30 px-3 py-1.5 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRenameStudent(student.id)}
-                          disabled={!editingName.trim()}
-                          className={cn(
-                            "rounded-lg px-3 py-1.5 text-xs font-medium",
-                            editingName.trim()
-                              ? "bg-accent text-on-accent hover:bg-accent-strong"
-                              : "cursor-not-allowed bg-accent/40 text-on-accent/70",
-                          )}
-                        >
-                          Guardar
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
+                <button
+                  type="button"
+                  onPointerDown={(e) => handlePointerDown(e, student.id)}
+                  onPointerMove={handlePointerMove}
+                  onPointerUp={handlePointerUp}
+                  onPointerCancel={handleDragEnd}
+                  aria-label={`Arrastrar para reordenar a ${student.name}`}
+                  title="Mantén pulsado y arrastra para reordenar"
+                  className="inline-flex h-8 w-8 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-sunken hover:text-foreground active:cursor-grabbing"
+                >
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+                    <path d="M7 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM13 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM7 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM13 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM7 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM13 14a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
+                  </svg>
+                </button>
+
+                <div className="min-w-0 flex-1">
+                  {isEditing ? (
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        value={editingName}
+                        onChange={(e) => setEditingName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleRenameStudent(student.id);
+                          }
+                          if (e.key === "Escape") {
                             setEditingId(null);
                             setEditingName("");
-                          }}
-                          className="rounded-lg border border-border/70 px-3 py-1.5 text-xs font-medium hover:bg-surface-sunken"
-                        >
-                          Cancelar
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex min-w-0 items-center gap-2">
-                        <p className="truncate text-base font-semibold">{student.name}</p>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingId(student.id);
-                            setEditingName(student.name);
-                          }}
-                          aria-label={`Editar nombre de ${student.name}`}
-                          title="Editar nombre"
-                          className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-sunken hover:text-foreground"
-                        >
-                          <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
-                            <path d="m2.695 14.762-1.262 3.155a.5.5 0 0 0 .65.65l3.155-1.262a4 4 0 0 0 1.343-.886L17.5 5.501a2.121 2.121 0 0 0-3-3L3.58 13.419a4 4 0 0 0-.885 1.343Z" />
-                          </svg>
-                        </button>
-                      </div>
-                    )}
-                    <p className="text-sm text-muted">
-                      {commentCount === 0
-                        ? "Sin comentarios"
-                        : commentCount === 1
-                          ? "1 comentario"
-                          : `${commentCount} comentarios`}
-                    </p>
-                  </div>
+                          }
+                        }}
+                        maxLength={80}
+                        autoFocus
+                        className="min-w-0 w-full rounded-md border border-border bg-surface-sunken/30 px-2 py-1 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRenameStudent(student.id)}
+                        disabled={!editingName.trim()}
+                        className={cn(
+                          "shrink-0 rounded-md px-2 py-1 text-xs font-medium",
+                          editingName.trim()
+                            ? "bg-accent text-on-accent hover:bg-accent-strong"
+                            : "cursor-not-allowed bg-accent/40 text-on-accent/70",
+                        )}
+                      >
+                        OK
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex min-w-0 items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => setCalendarStudent(student)}
+                        className="min-w-0 truncate text-left text-sm font-semibold text-foreground hover:text-accent"
+                        title={`Abrir agenda de ${student.name}`}
+                      >
+                        {student.name}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingId(student.id);
+                          setEditingName(student.name);
+                        }}
+                        aria-label={`Editar nombre de ${student.name}`}
+                        title="Editar nombre"
+                        className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-sunken hover:text-foreground"
+                      >
+                        <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true">
+                          <path d="m2.695 14.762-1.262 3.155a.5.5 0 0 0 .65.65l3.155-1.262a4 4 0 0 0 1.343-.886L17.5 5.501a2.121 2.121 0 0 0-3-3L3.58 13.419a4 4 0 0 0-.885 1.343Z" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setCommentStudent(student)}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/70 bg-surface text-accent transition-colors hover:bg-surface-sunken"
-                    aria-label={`Añadir comentario a ${student.name}`}
-                    title="Añadir comentario"
-                  >
-                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
-                      <path d="M3.5 4.75A1.75 1.75 0 0 1 5.25 3h9.5A1.75 1.75 0 0 1 16.5 4.75v7.5a1.75 1.75 0 0 1-1.75 1.75H6.56l-2.22 2.22A.75.75 0 0 1 3 15.69V4.75Z" />
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCalendarStudent(student)}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/70 bg-surface text-accent transition-colors hover:bg-surface-sunken"
-                    aria-label={`Ver agenda de ${student.name}`}
-                    title="Agenda"
-                  >
-                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
-                      <path fillRule="evenodd" d="M5.75 2a.75.75 0 0 1 .75.75V4h7V2.75a.75.75 0 0 1 1.5 0V4h.25A1.75 1.75 0 0 1 17 5.75v9.5A1.75 1.75 0 0 1 15.25 17H4.75A1.75 1.75 0 0 1 3 15.25v-9.5A1.75 1.75 0 0 1 4.75 4H5V2.75A.75.75 0 0 1 5.75 2Zm-1 5.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25v-6.5c0-.69-.56-1.25-1.25-1.25H4.75Z" clipRule="evenodd" />
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteStudent(student.id)}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-danger/30 bg-surface text-danger transition-colors hover:bg-danger/10"
-                    aria-label={`Eliminar a ${student.name}`}
-                    title="Eliminar alumno"
-                  >
-                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
-                      <path fillRule="evenodd" d="M8.75 1A2.75 2.75 0 0 0 6 3.75v.443c-.795.077-1.584.176-2.365.298a.75.75 0 1 0 .23 1.482l.149-.022 1.005 11.36A2.75 2.75 0 0 0 7.759 19h4.482a2.75 2.75 0 0 0 2.74-2.508l1.005-11.36.149.022a.75.75 0 0 0 .23-1.482A41.03 41.03 0 0 0 14 4.193V3.75A2.75 2.75 0 0 0 11.25 1h-2.5ZM10 4c.84 0 1.673.025 2.5.075V3.75c0-.69-.56-1.25-1.25-1.25h-2.5c-.69 0-1.25.56-1.25 1.25v.325C8.327 4.025 9.16 4 10 4ZM8.58 7.72a.75.75 0 0 0-1.5.06l.3 7.5a.75.75 0 1 0 1.5-.06l-.3-7.5Zm4.34.06a.75.75 0 1 0-1.5-.06l-.3 7.5a.75.75 0 1 0 1.5.06l.3-7.5Z" clipRule="evenodd" />
-                    </svg>
-                  </button>
-                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleDeleteStudent(student.id)}
+                  aria-label={`Eliminar a ${student.name}`}
+                  title="Eliminar alumno"
+                  className="absolute right-1.5 top-1.5 inline-flex h-6 w-6 items-center justify-center rounded-md text-muted transition-colors hover:bg-danger/10 hover:text-danger"
+                >
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4" aria-hidden="true">
+                    <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                  </svg>
+                </button>
               </Card>
             );
           })

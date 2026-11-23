@@ -11,6 +11,13 @@ No usar `drizzle-kit push --force` contra producciÃ³n. Para cambios de esquema
 
 ## Despliegues
 
+### v0.1.9 â€” 2026-11-23
+- **Commit**: `6617142`
+- **Cambios**:
+  - Seguimiento del alumnado: tarjetas compactas (solo nombre). Clic en el nombre abre la agenda. Botones de acciÃ³n eliminados; eliminar alumno con X en esquina superior derecha con confirmaciÃ³n. Grid mÃ¡s denso para ver mÃ¡s alumnos.
+- **BD**: sin cambios de esquema.
+- **VerificaciÃ³n**: `npx tsc --noEmit`, `npm run lint`, deploy Vercel prod.
+
 ### v0.1.8 â€” 2026-11-23
 - **Commit**: `e42db47`
 - **Cambios**:
@@ -73,6 +80,7 @@ No usar `drizzle-kit push --force` contra producciÃ³n. Para cambios de esquema
 
 ### v0.1.0 â€” base
 - MVP inicial Leeduca (4 aÃ±os, ejercicios, seguimiento bÃ¡sico, Turso/Drizzle).
+
 
 
 
