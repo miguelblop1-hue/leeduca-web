@@ -37,9 +37,9 @@ export const visualCatalog: Record<VisualId, PreleoVisual> = {
     image: "/media/real-objects/casa.jpg",
     category: "object",
     credit: {
-      author: "Victuallers",
+      author: "Nicole Smith",
       license: "CC BY-SA 4.0",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:1_The_Loan,_Lauder.jpg",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:House_(May_30,_2020).jpg",
     },
   },
   cama: {
@@ -49,9 +49,9 @@ export const visualCatalog: Record<VisualId, PreleoVisual> = {
     image: "/media/real-objects/cama.jpg",
     category: "object",
     credit: {
-      author: "Eifel07",
-      license: "CC BY-SA 3.0",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:Altes_Schlafzimmer.JPG",
+      author: "Kurt Kaiser",
+      license: "CC0",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Bed_in_hotel_room.jpg",
     },
   },
   gato: {
@@ -97,9 +97,9 @@ export const visualCatalog: Record<VisualId, PreleoVisual> = {
     image: "/media/real-objects/mesa.jpg",
     category: "object",
     credit: {
-      author: "User:JossDude",
-      license: "Dominio público",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:Coffee_table_on_a_white_background.jpg",
+      author: "Jean-Michel Frank",
+      license: "CC BY-SA 4.0",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Parsons_Table.jpg",
     },
   },
   queso: {
@@ -109,9 +109,9 @@ export const visualCatalog: Record<VisualId, PreleoVisual> = {
     image: "/media/real-objects/queso.jpg",
     category: "food",
     credit: {
-      author: "Paulmcdonald",
-      license: "CC BY-SA 3.0",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:Parmesan_Cheese_Wheel_-_Whole_Foods.JPG",
+      author: "Original photo by John Sullivan. Edit own work.",
+      license: "Dominio público",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Cheese_limburger_edit.jpg",
     },
   },
   vaca: {
@@ -121,10 +121,9 @@ export const visualCatalog: Record<VisualId, PreleoVisual> = {
     image: "/media/real-objects/vaca.jpg",
     category: "animal",
     credit: {
-      author: "Michael Barera",
-      license: "CC BY-SA 4.0",
-      sourceUrl:
-        "https://commons.wikimedia.org/wiki/File:2022_Wisconsin_State_Fair_53_(cow_at_Dairy_Lane).jpg",
+      author: "Keith Weller/USDA",
+      license: "Dominio público",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Cow_female_black_white.jpg",
     },
   },
   pan: {
@@ -134,9 +133,9 @@ export const visualCatalog: Record<VisualId, PreleoVisual> = {
     image: "/media/real-objects/pan.jpg",
     category: "food",
     credit: {
-      author: "Judgefloro",
-      license: "Dominio público",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:0727jfToasted_breadfvf.jpg",
+      author: "jules / stonesoup",
+      license: "CC BY 2.0",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Baguettes_-_stonesoup.jpg",
     },
   },
   flor: {
@@ -170,10 +169,9 @@ export const visualCatalog: Record<VisualId, PreleoVisual> = {
     image: "/media/real-objects/regalo.jpg",
     category: "object",
     credit: {
-      author: "Shixart1985",
-      license: "CC BY 2.0",
-      sourceUrl:
-        "https://commons.wikimedia.org/wiki/File:Brown_gift_box_with_red_ribbon_and_bow.jpg",
+      author: "Milad Mosapoor",
+      license: "Atribución",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Gift_box.jpg",
     },
   },
   globo: {
@@ -183,9 +181,9 @@ export const visualCatalog: Record<VisualId, PreleoVisual> = {
     image: "/media/real-objects/globo.jpg",
     category: "object",
     credit: {
-      author: "emma marie andersson",
-      license: "CC BY-SA 2.0",
-      sourceUrl: "https://commons.wikimedia.org/wiki/File:2016_65_balloon_(27242065630).jpg",
+      author: "Friedrich Haag",
+      license: "CC BY-SA 4.0",
+      sourceUrl: "https://commons.wikimedia.org/wiki/File:Balloon_on_a_children%27s_birthday_party.jpg",
     },
   },
   helado: {
