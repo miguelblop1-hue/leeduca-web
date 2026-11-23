@@ -11,6 +11,16 @@ No usar `drizzle-kit push --force` contra producciÃ³n. Para cambios de esquema
 
 ## Despliegues
 
+### v0.1.22 — 2026-11-23
+- **Commit**: `a283234`
+- **Cambios**:
+  - Nueva sección Actividades PRELEO de 4 años: menú por 4 bloques (conciencia fonológica, vocabulario, comprensión, fluidez) con 18 actividades y 108 ejercicios con fotografías reales.
+  - Flujo de diapositivas: 3 opciones → Siguiente → solución con solo la imagen correcta resaltada; sin feedback de acierto/error ni resultados guardados.
+  - Generador IA validado: solo crea instrucciones usando imágenes ya existentes del catálogo; sin generación de imágenes en tiempo de ejecución.
+  - Créditos de imágenes en `docs/IMAGE_CREDITS.md`.
+- **BD**: sin cambios de esquema.
+- **Verificación**: `npx tsc --noEmit`, `npm run lint`, `npm run build`, prueba funcional del flujo completo en navegador.
+
 ### v0.1.21 â€” 2026-11-23
 - **Commit**: `78b8512`
 - **Cambios**:
