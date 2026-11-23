@@ -11,6 +11,16 @@ No usar `drizzle-kit push --force` contra producciÃ³n. Para cambios de esquema
 
 ## Despliegues
 
+### v0.1.21 â€” 2026-11-23
+- **Commit**: `78b8512`
+- **Cambios**:
+  - Fase 1 auth (better-auth + Drizzle/Turso, misma stack que Sano): tablas `user/session/account/verification`, login email+contraseÃ±a, logout, guards en layout y server actions. Sin registro pÃºblico.
+  - Seguimiento: datos filtrados por `user_id`; acciones verifican propiedad. Datos existentes backfilled al usuario inicial sin pÃ©rdida (15 alumnos, 2 comentarios verificados).
+  - UI: bloques Seguimiento e Informes compactados al 60% en escritorio.
+- **BD**: migraciÃ³n segura aplicada (script `scripts/migrate-auth-phase1.mjs`): auth tables + `user_id` en seguimiento_student/comment + Ã­ndices + backfill. Sin `push --force`. VerificaciÃ³n post-migraciÃ³n OK.
+- **Env**: `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` en Vercel prod.
+- **VerificaciÃ³n**: `npx tsc --noEmit`, `npm run lint`, deploy Vercel prod.
+
 ### v0.1.20 â€” 2026-11-23
 - **Commit**: `2078f18`
 - **Cambios**:
@@ -159,6 +169,7 @@ No usar `drizzle-kit push --force` contra producciÃ³n. Para cambios de esquema
 
 ### v0.1.0 â€” base
 - MVP inicial Leeduca (4 aÃ±os, ejercicios, seguimiento bÃ¡sico, Turso/Drizzle).
+
 
 
 

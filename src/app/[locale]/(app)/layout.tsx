@@ -1,12 +1,20 @@
-import { Link } from "@/i18n/navigation";
+import { Link, redirect } from "@/i18n/navigation";
+import { getLocale } from "next-intl/server";
 import { ReleaseNotice } from "@/components/layout/release-notice";
+import { UserMenu } from "@/components/layout/user-menu";
 import { APP_NAME } from "@/lib/app-name";
+import { getOptionalUser } from "@/lib/auth/guard";
 
 export default async function AppLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const [user, locale] = await Promise.all([getOptionalUser(), getLocale()]);
+  if (!user) {
+    redirect({ href: "/login", locale });
+  }
+
   return (
     <div className="relative min-h-full">
       <div
@@ -28,6 +36,7 @@ export default async function AppLayout({
               </p>
             </span>
           </Link>
+          <UserMenu name={user!.name} />
         </div>
       </header>
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6 sm:py-10">

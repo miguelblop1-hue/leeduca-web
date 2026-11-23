@@ -1,7 +1,8 @@
 "use server";
 
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
+import { requireUser } from "@/lib/auth/guard";
 import { seguimientoComment, seguimientoStudent } from "@/lib/db/schema";
 import type { SeguimientoData, Student, StudentComment } from "./types";
 
@@ -27,29 +28,19 @@ function toComment(row: typeof seguimientoComment.$inferSelect): StudentComment 
   };
 }
 
-export async function getSeguimientoData(): Promise<SeguimientoData> {
+async function getSeguimientoDataForUser(userId: string): Promise<SeguimientoData> {
   const [students, comments] = await Promise.all([
     db
       .select()
       .from(seguimientoStudent)
+      .where(eq(seguimientoStudent.userId, userId))
       .orderBy(asc(seguimientoStudent.sortOrder), asc(seguimientoStudent.createdAt)),
-    db.select().from(seguimientoComment).orderBy(asc(seguimientoComment.createdAt)),
+    db
+      .select()
+      .from(seguimientoComment)
+      .where(eq(seguimientoComment.userId, userId))
+      .orderBy(asc(seguimientoComment.createdAt)),
   ]);
-
-  // Seed default students if DB is empty (first use / fresh DB)
-  if (students.length === 0 && comments.length === 0) {
-    const now = new Date();
-    const defaults = [
-      { id: uid(), name: "Lucía", sortOrder: 0, createdAt: now },
-      { id: uid(), name: "Mateo", sortOrder: 1, createdAt: now },
-      { id: uid(), name: "Sofía", sortOrder: 2, createdAt: now },
-    ];
-    await db.insert(seguimientoStudent).values(defaults);
-    return {
-      students: defaults.map(toStudent),
-      comments: [],
-    };
-  }
 
   return {
     students: students.map(toStudent),
@@ -57,21 +48,29 @@ export async function getSeguimientoData(): Promise<SeguimientoData> {
   };
 }
 
+export async function getSeguimientoData(): Promise<SeguimientoData> {
+  const user = await requireUser();
+  return getSeguimientoDataForUser(user.id);
+}
+
 export async function createStudentAction(name: string): Promise<SeguimientoData> {
+  const user = await requireUser();
   const trimmed = name.trim().slice(0, 80);
   if (trimmed) {
     const existing = await db
       .select({ sortOrder: seguimientoStudent.sortOrder })
-      .from(seguimientoStudent);
+      .from(seguimientoStudent)
+      .where(eq(seguimientoStudent.userId, user.id));
     const maxOrder = existing.reduce((m, r) => Math.max(m, r.sortOrder ?? 0), -1);
     await db.insert(seguimientoStudent).values({
       id: uid(),
+      userId: user.id,
       name: trimmed,
       sortOrder: maxOrder + 1,
       createdAt: new Date(),
     });
   }
-  return getSeguimientoData();
+  return getSeguimientoDataForUser(user.id);
 }
 
 export async function createCommentAction(input: {
@@ -79,68 +78,86 @@ export async function createCommentAction(input: {
   date: string;
   text: string;
 }): Promise<SeguimientoData> {
+  const user = await requireUser();
   const text = input.text.trim().slice(0, 1000);
   if (text && input.studentId && /^\d{4}-\d{2}-\d{2}$/.test(input.date)) {
-    await db.insert(seguimientoComment).values({
-      id: uid(),
-      studentId: input.studentId,
-      date: input.date,
-      text,
-      createdAt: new Date(),
-    });
+    const [student] = await db
+      .select({ id: seguimientoStudent.id })
+      .from(seguimientoStudent)
+      .where(and(eq(seguimientoStudent.id, input.studentId), eq(seguimientoStudent.userId, user.id)))
+      .limit(1);
+    if (student) {
+      await db.insert(seguimientoComment).values({
+        id: uid(),
+        userId: user.id,
+        studentId: input.studentId,
+        date: input.date,
+        text,
+        createdAt: new Date(),
+      });
+    }
   }
-  return getSeguimientoData();
+  return getSeguimientoDataForUser(user.id);
 }
 
 export async function deleteStudentAction(studentId: string): Promise<SeguimientoData> {
+  const user = await requireUser();
   if (studentId) {
-    await db.delete(seguimientoStudent).where(eq(seguimientoStudent.id, studentId));
+    await db
+      .delete(seguimientoStudent)
+      .where(and(eq(seguimientoStudent.id, studentId), eq(seguimientoStudent.userId, user.id)));
   }
-  return getSeguimientoData();
+  return getSeguimientoDataForUser(user.id);
 }
 
 export async function deleteCommentAction(commentId: string): Promise<SeguimientoData> {
+  const user = await requireUser();
   if (commentId) {
-    await db.delete(seguimientoComment).where(eq(seguimientoComment.id, commentId));
+    await db
+      .delete(seguimientoComment)
+      .where(and(eq(seguimientoComment.id, commentId), eq(seguimientoComment.userId, user.id)));
   }
-  return getSeguimientoData();
+  return getSeguimientoDataForUser(user.id);
 }
 
 export async function updateCommentAction(commentId: string, text: string): Promise<SeguimientoData> {
+  const user = await requireUser();
   const next = text.trim().slice(0, 1000);
   if (commentId && next) {
     await db
       .update(seguimientoComment)
       .set({ text: next })
-      .where(eq(seguimientoComment.id, commentId));
+      .where(and(eq(seguimientoComment.id, commentId), eq(seguimientoComment.userId, user.id)));
   }
-  return getSeguimientoData();
+  return getSeguimientoDataForUser(user.id);
 }
 
 export async function reorderStudentsAction(orderedIds: string[]): Promise<SeguimientoData> {
+  const user = await requireUser();
   if (Array.isArray(orderedIds) && orderedIds.length > 0) {
     await Promise.all(
       orderedIds.map((id, index) =>
         db
           .update(seguimientoStudent)
           .set({ sortOrder: index })
-          .where(eq(seguimientoStudent.id, id)),
+          .where(and(eq(seguimientoStudent.id, id), eq(seguimientoStudent.userId, user.id))),
       ),
     );
   }
-  return getSeguimientoData();
+  return getSeguimientoDataForUser(user.id);
 }
 
 export async function renameStudentAction(
   studentId: string,
   name: string,
 ): Promise<SeguimientoData> {
+  const user = await requireUser();
   const trimmed = name.trim().slice(0, 80);
   if (studentId && trimmed) {
     await db
       .update(seguimientoStudent)
       .set({ name: trimmed })
-      .where(eq(seguimientoStudent.id, studentId));
+      .where(and(eq(seguimientoStudent.id, studentId), eq(seguimientoStudent.userId, user.id)));
   }
-  return getSeguimientoData();
+  return getSeguimientoDataForUser(user.id);
 }

@@ -4,9 +4,10 @@
  * entrada en docs/DEPLOY.md con cambios.
  */
 export const CURRENT_RELEASE = {
-  version: "0.1.20",
+  version: "0.1.21",
   date: "2026-11-23",
   changes: [
-    "Seguimiento: reorganizado en micrófono, alumnos, añadir alumno compacto en grid e informes compactos al final.",
+    "Acceso con login: seguimiento protegido por usuario y contraseña. Los datos existentes se asignan al usuario inicial.",
+    "Seguimiento e informes: bloques compactados al 60% en escritorio para una vista más centrada.",
   ],
 } as const;

@@ -1204,7 +1204,7 @@ export function StudentTracker({ initialData }: { initialData: SeguimientoData }
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border/60 bg-surface/60 px-4 py-3">
+      <div className="mx-auto flex w-full flex-wrap items-center justify-between gap-2 rounded-xl border border-border/60 bg-surface/60 px-4 py-3 lg:w-[60%]">
         <div className="min-w-0">
           <p className="text-sm font-medium">Informes</p>
           <p className="text-xs text-muted">Descarga semanal o mensual con comentarios de los alumnos seleccionados.</p>

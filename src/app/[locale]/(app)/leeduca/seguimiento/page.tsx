@@ -27,7 +27,7 @@ export default async function SeguimientoPage() {
         <span aria-hidden>←</span> {common("backToPlatform")}
       </Link>
 
-      <Card className="space-y-4 p-5 sm:p-6">
+      <Card className="mx-auto w-full space-y-4 p-5 sm:p-6 lg:w-[60%]">
         <div>
           <h2 className="text-lg font-semibold">Seguimiento de alumnos</h2>
           <p className="mt-1 text-sm text-muted">
