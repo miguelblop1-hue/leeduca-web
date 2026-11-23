@@ -23,6 +23,7 @@ export default async function LeeducaAgePage({
   const t = await getTranslations("Platform.agePage");
   const common = await getTranslations("Common");
   const exercises = await getTranslations("Exercises");
+  const preleo = await getTranslations("Preleo4");
   const content = edades345[edad]?.[locale === "en" ? "en" : "es"];
 
   if (!content) {
@@ -74,6 +75,26 @@ export default async function LeeducaAgePage({
           {common("ageYears", { age: edad })}
         </span>
       </div>
+
+      <Link
+        href="/leeduca/4/actividades"
+        className="group flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-accent/30 bg-accent-soft/70 px-5 py-5 shadow-[var(--shadow-soft)] transition-colors hover:border-accent/60 hover:bg-accent-soft sm:px-6"
+      >
+        <span className="space-y-1">
+          <span className="block text-base font-semibold text-accent sm:text-lg">
+            {preleo("openActivities")}
+          </span>
+          <span className="block text-sm text-muted">
+            {preleo("openActivitiesHint")}
+          </span>
+        </span>
+        <span
+          aria-hidden
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-lg font-bold text-on-accent transition-transform group-hover:translate-x-1"
+        >
+          →
+        </span>
+      </Link>
 
       <section className="space-y-4">
         <ExerciseRunner age={edad} lockAge />

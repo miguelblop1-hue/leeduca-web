@@ -324,5 +324,35 @@
         "tracking": "Tracking"
       }
     }
+  },
+  "Preleo4": {
+    "menuTitle": "PRELEO activities",
+    "menuIntro": "Choose a block and practise with real photos. Each activity is a short set of exercises.",
+    "openActivities": "Open PRELEO activities",
+    "openActivitiesHint": "Real photos by block: phonological awareness, vocabulary, comprehension and fluency.",
+    "backToAge": "Back to age 4",
+    "backToMenu": "Back to activities",
+    "next": "Next",
+    "answer": "The answer",
+    "finishedTitle": "Well done!",
+    "repeat": "Repeat",
+    "empty": "No exercises available.",
+    "aiBadge": "AI generated",
+    "generateTitle": "More AI exercises",
+    "generateHint": "AI only writes instructions using catalog photos; it never creates new images.",
+    "themePlaceholder": "Topic (optional)",
+    "generate": "Generate more",
+    "generating": "Generating…",
+    "errors": {
+      "not_configured": "AI generation is not configured.",
+      "unauthorized": "You need to sign in to generate exercises.",
+      "invalid_input": "Check the activity details.",
+      "timeout": "Generation took too long. Please try again.",
+      "invalid_response": "AI did not return valid exercises. Please try again.",
+      "rate_limit": "Too many requests. Please wait and try again.",
+      "bad_request": "The request could not be completed.",
+      "request_failed": "Could not connect to the AI service.",
+      "unknown": "An unexpected error occurred."
+    }
   }
 }

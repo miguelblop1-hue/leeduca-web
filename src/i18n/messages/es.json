@@ -324,5 +324,35 @@
         "tracking": "Seguimiento"
       }
     }
+  },
+  "Preleo4": {
+    "menuTitle": "Actividades PRELEO",
+    "menuIntro": "Elige un bloque y practica con imágenes reales. Cada actividad es una tanda corta de ejercicios.",
+    "openActivities": "Abrir actividades PRELEO",
+    "openActivitiesHint": "Imágenes reales por bloques: conciencia fonológica, vocabulario, comprensión y fluidez.",
+    "backToAge": "Volver a 4 años",
+    "backToMenu": "Volver a actividades",
+    "next": "Siguiente",
+    "answer": "La respuesta",
+    "finishedTitle": "¡Muy bien!",
+    "repeat": "Repetir",
+    "empty": "No hay ejercicios disponibles.",
+    "aiBadge": "Generado con IA",
+    "generateTitle": "Más ejercicios con IA",
+    "generateHint": "La IA solo crea instrucciones con las fotos del catálogo; nunca genera imágenes nuevas.",
+    "themePlaceholder": "Tema (opcional)",
+    "generate": "Generar más",
+    "generating": "Generando…",
+    "errors": {
+      "not_configured": "La generación con IA no está configurada.",
+      "unauthorized": "Tienes que iniciar sesión para generar ejercicios.",
+      "invalid_input": "Revisa los datos de la actividad.",
+      "timeout": "La generación ha tardado demasiado. Inténtalo de nuevo.",
+      "invalid_response": "La IA no ha devuelto ejercicios válidos. Inténtalo de nuevo.",
+      "rate_limit": "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo.",
+      "bad_request": "No se ha podido realizar la solicitud.",
+      "request_failed": "No se ha podido conectar con la IA.",
+      "unknown": "Se ha producido un error inesperado."
+    }
   }
 }
