@@ -12,7 +12,7 @@ No usar `drizzle-kit push --force` contra producciÃ³n. Para cambios de esquema
 ## Despliegues
 
 ### v0.1.24 — 2026-11-23
-- **Commit**: pendiente
+- **Commit**: `f81ab84`
 - **Cambios**:
   - Imágenes más claras para casa, cama, mesa, vaca, globo, regalo, queso y pan sustituidas por fotos más obvias.
   - Créditos actualizados en `docs/IMAGE_CREDITS.md` y `image-catalog.ts`.
